@@ -4,8 +4,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { axiosPlugin } from '@/plugins/axios'
 import { codHeaderToken, codMsgInputsErros, codLimparObjetoReativo } from '@/codigos'
 import type {tsCamposEdicao, tsEdicaoSenha} from './tsUserUpdate.ts'
+import EmpresasParaUserUpdate from '@/components/cadastro/empresas/EmpresasParaUserUpdate.vue'
 import ModalApp from '@/components/diversos/modal/ModalApp.vue'
-import { modalAppCod } from '@/components/diversos/modal/modalAppCod.ts'
+import { modalAppCod } from '@/components/diversos/modal/modalAppCod.ts' 
 
 const route                     = useRoute()       // retorna informações da rota atual (como parâmetros, query, nome da rota etc.).
 const router                    = useRouter()      // retorna o roteador que permite navegação programática (como router.push(...), router.replace(...), etc.).
@@ -18,6 +19,7 @@ const token                     = codHeaderToken()
 const admin                     = 0
 const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
 const mensagensModal = reactive<string[]>([]);
+const carregaEmpresas = ref<InstanceType<typeof EmpresasParaUserUpdate> | null>(null);
 
 onMounted(() => {
     edit()
@@ -31,7 +33,9 @@ async function edit(){
         for (const i of Object.keys(camposVisao) as (keyof tsCamposEdicao)[]) {
             camposVisao[i]  = data.usuario[i]
             camposEdicao[i] = data.usuario[i]
-        }        
+        }
+        if(carregaEmpresas.value){ carregaEmpresas.value.recarregaCss(data.empresas)}
+                
     }catch(error){
         console.error('Erro na requisição:', error);
     }        
@@ -212,7 +216,7 @@ function limpaMsgDigitarInputSenha(campo: String){
                     <div class=" col-md-12 borda paddingZero" :style="{ height: alturaDivUsuarioEmpresa }" style="margin-top:8px;">
                         <div class="blocoVerde">EMPRESAS DO USUÁRIO</div> 
                         <div class="paddingTreis">
-                            EMPRESAS PARA USER UPDATE {{ alturaDivUsuarioEmpresa }}
+                            <EmpresasParaUserUpdate :user_id="id" ref="carregaEmpresas"/>
                         </div>
                     </div>
                 </div>    
