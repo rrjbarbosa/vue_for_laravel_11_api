@@ -19,13 +19,13 @@
         cnpj:           string | null,
         cidade:         string | null,
         bairro:         string | null,
-        ativo:          string | null,
+        ativo:          number | null,
         index:          number, 
         css:            string | null,       
     }
 
     interface tsImputFiltros { 
-        ativo:          string | null,
+        ativo:          number | null,
         nome_fantasia:  string | null,
         cnpj:           string | null,
         cidade:         string | null,
@@ -78,7 +78,7 @@
         cnpj: '', 
         cidade:'', 
         bairro:'',
-        ativo:'',
+        ativo:0,
         index:0,
         css:'',
     });
@@ -90,10 +90,10 @@
         let arrayObj = []
         for(let i of dados ){
             switch(true){
-                case i.ativo == 'ativo' && i.id == linhaSelecionada.id :     i.css =  'ativoSelect';    break;
-                case i.ativo == 'inativo' && i.id == linhaSelecionada.id :   i.css =  'inativoSelect';  break;
-                case i.ativo == 'ativo'  :                                   i.css =  'ativo';          break;
-                case i.ativo == 'inativo'  :                                 i.css =  'inativo';        break;            
+                case i.ativo == 1 && i.id == linhaSelecionada.id :     i.css =  'ativoSelect';    break;
+                case i.ativo == 0 && i.id == linhaSelecionada.id :   i.css =  'inativoSelect';  break;
+                case i.ativo == 1  :                                   i.css =  'ativo';          break;
+                case i.ativo == 0  :                                 i.css =  'inativo';        break;            
             }
             arrayObj.push(i);
         } 
@@ -139,7 +139,7 @@
         try{
             let backDados = {id:linhaSelecionada.id, ativo:linhaSelecionada.ativo, user_id:props.user_id}
             const { data } = await axiosPlugin.patch(`empresas-em-user-update-habitita-desabilita/${linhaSelecionada.id}`, backDados, token);
-            dados[linhaSelecionada.index].ativo = linhaSelecionada.ativo == 'ativo' ? 'inativo' : 'ativo';      //-Atualiza array de objeto dados da grid
+            dados[linhaSelecionada.index].ativo = linhaSelecionada.ativo == 1 ? 0 : 1;      //-Atualiza array de objeto dados da grid
             recarregaCss(dados)                                                                                 //-Recarrega a exibição da grid
             linhaSelecionadaLimpar()
             modalFechar('empresasParaUserUpdateHabilitaDesabilita')
@@ -168,20 +168,20 @@
     //************************************[BTNS]***************************************
     //*********************************************************************************
     function btnDesabilitarDisabled(){
-        let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo=='ativo'? false : true
+        let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo==1? false : true
         return trueFalse
     }
     function btnDesabilitarExibir(){
-       let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo=='ativo'? true : false
+       let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo==1? true : false
        return trueFalse
     }
     
     function btnHabilitarDisabled(){
-        let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.id && linhaSelecionada.ativo=='inativo'? false : true
+        let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.id && linhaSelecionada.ativo==0? false : true
         return trueFalse
     }
     function btnHabilitarExibir(){
-       let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo=='ativo'? true : false
+       let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo==1? true : false
        return trueFalse
     }
         
@@ -216,9 +216,13 @@
     
     <div style="overflow-y: auto; margin-left: 3px;" >
         <div class=" div_thead tamTbl">
-            <div class=" div_th t100">
-                Status <br>
-                <input type="text" v-model="inputFiltro.ativo" class="inputBuscaTbl">
+            <div class=" div_th t50">
+                 <br>
+                <select name="status" v-model="inputFiltro.ativo" class="inputBuscaTbl">
+                    <option value=""></option>
+                    <option value="1" class="ok">&#10004;</option>
+                    <option value="0" class="obs">&#10008;</option>
+                </select>
             </div>
             <div class=" div_th t400">
                 Empresa <br> 
@@ -239,8 +243,9 @@
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
         <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
-                <div class=" div_td t100 text-wrap" @click="linhaFoco(i, index)">
-                    {{i.ativo }}
+                <div class=" div_td t50 text-wrap" @click="linhaFoco(i, index)">
+                    <span v-if="i.ativo == 1" class="ok">&#10004;</span> 
+                    <span v-else class="obs">&#10008;</span>
                 </div>
                 <div class=" div_td t400 text-wrap" @click="linhaFoco(i, index)">
                     {{i.nome_fantasia }}
@@ -298,17 +303,21 @@
     .aguarde{
         background-color: rgb(243, 146, 20);
     }
-    .s_admin{
+    .ok{
         color:green;
         font-weight: bold;
         font-size: 15px;
     }
-    .n_admin{
-        color: rgb(128, 126, 126);
+    .obs{
+        color: #ff0000;
         font-weight: bold;
         font-size: 15px;
     }
 
+
+    .t50{
+        width: '50px';
+    }
 
     .t100{
         width: '100px';
