@@ -330,7 +330,6 @@
 </script>
 <!--=================================================================================================================-->
 <template >
-     <input type="email"   class="inputBuscaTbl">
     <div style="height: 10%; margin-left: 3px;">
         <div class="navegacao paddingZero "> 
             <div  class="paddingZero" style="text-align: left;">     

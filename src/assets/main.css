@@ -261,23 +261,18 @@ tr{ border: 1px solid #ced4da; color: #495057; }
     padding: 3px;
 }
 /*----Circulo Carregando-----------------------------------------------------------*/
-.loader {
-    display: inline-block; /* Comportamento de texto */
-    width: 15px;
-    height: 15px;
-    border: 5 solid transparent;
-    border-top:  solid #e5eb95;
-    border-radius: 50%;
-    animation: spin 1.2s linear infinite;
-    margin-right: 5px;
+.carregando {
+  animation: is-rotating 1s infinite;
+  border: 6px solid #e5e5e5;
+  border-radius: 50%;
+  border-top-color: #56ad5e;
+  height: 50px;
+  width: 50px;
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+@keyframes is-rotating {
+  to {
+    transform: rotate(1turn);
+  }
 }
 

@@ -25,7 +25,6 @@
     }
 
     interface tsImputFiltros { 
-        ativo:          number | null,
         nome_fantasia:  string | null,
         cnpj:           string | null,
         cidade:         string | null,
@@ -39,7 +38,6 @@
     const props = defineProps<tsProps>();
        
     const inputFiltro = reactive<tsImputFiltros>({
-        ativo:'',
         nome_fantasia:'', 
         cnpj:'', 
         cidade:'', 
@@ -52,6 +50,8 @@
 
     const administrador = ref(false)
 
+    const carregando = ref(false)
+
     onMounted(()=>{
         administrador.value = codUserLogado()['admin'] == 1 ? true : false
     })
@@ -62,7 +62,6 @@
 
     function limparPesquisa(){
         Object.assign(inputFiltro, {
-            ativo:"",
             nome_fantasia:'', 
             cnpj:'', 
             cidade:'', 
@@ -101,8 +100,8 @@
     }
     
     async function gridPesquisa(){
-        let camposPesquisados  =  {...apenasInputsPreenchidos(inputFiltro)}
-       
+        let camposPesquisados       =  {...apenasInputsPreenchidos(inputFiltro)}
+        camposPesquisados.user_id   = props.user_id
         try {
             const { data } = await axiosPlugin.post('empresas-em-user-update-grid', camposPesquisados, token);
             dados.splice(0, dados.length, ...[]);   //-Reseta dados
@@ -119,7 +118,7 @@
         let arrayObj = []
         for(let i of dadosCss ){
             switch(true){
-                case i.ativo == 'ativo': i.css = 'ativo'; break;
+                case i.ativo == 1: i.css = 'ativo'; break;
                 default:                 i.css = 'inativo';        
             }
             arrayObj.push(i);
@@ -136,19 +135,23 @@
     }
 
     async function desabilitaHabilita(){
-        try{
-            let backDados = {id:linhaSelecionada.id, ativo:linhaSelecionada.ativo, user_id:props.user_id}
-            const { data } = await axiosPlugin.patch(`empresas-em-user-update-habitita-desabilita/${linhaSelecionada.id}`, backDados, token);
+        carregando.value = true
+        let backDados = {id:linhaSelecionada.id, ativo:linhaSelecionada.ativo, user_id:props.user_id}
+        await axiosPlugin.patch(`empresas-em-user-update-habitita-desabilita/${linhaSelecionada.id}`, backDados, token)
+        .then(() =>{
+            carregando.value = false
             dados[linhaSelecionada.index].ativo = linhaSelecionada.ativo == 1 ? 0 : 1;      //-Atualiza array de objeto dados da grid
-            recarregaCss(dados)                                                                                 //-Recarrega a exibição da grid
+            recarregaCss(dados)                                                             //-Recarrega a exibição da grid
             linhaSelecionadaLimpar()
             modalFechar('empresasParaUserUpdateHabilitaDesabilita')
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
             modalAbrir('empresasParaUserUpdateMsgOk')
-        }catch(error:any){
+        })
+        .catch(error =>{
+            carregando.value = false
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('empresasParaUserUpdateMsgErro')
-        }         
+        })   
     }
 
     function linhaSelecionadaLimpar(){
@@ -216,14 +219,6 @@
     
     <div style="overflow-y: auto; margin-left: 3px;" >
         <div class=" div_thead tamTbl">
-            <div class=" div_th t50">
-                 <br>
-                <select name="status" v-model="inputFiltro.ativo" class="inputBuscaTbl">
-                    <option value=""></option>
-                    <option value="1" class="ok">&#10004;</option>
-                    <option value="0" class="obs">&#10008;</option>
-                </select>
-            </div>
             <div class=" div_th t400">
                 Empresa <br> 
                 <input type="text" v-model="inputFiltro.nome_fantasia" class="inputBuscaTbl">
@@ -243,10 +238,6 @@
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
         <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
-                <div class=" div_td t50 text-wrap" @click="linhaFoco(i, index)">
-                    <span v-if="i.ativo == 1" class="ok">&#10004;</span> 
-                    <span v-else class="obs">&#10008;</span>
-                </div>
                 <div class=" div_td t400 text-wrap" @click="linhaFoco(i, index)">
                     {{i.nome_fantasia }}
                 </div>
@@ -265,16 +256,24 @@
     <!-- MODAL HABILITA DESABILITA USER ===================================================================================== -->
     <ModalApp   :isOpen="modal.empresasParaUserUpdateHabilitaDesabilita" @close="modalFechar('empresasParaUserUpdateHabilitaDesabilita')"  
                 :largura="'80%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Edição de Usuário" :mensagens="mensagensModal" >    
+        
         <div class="row " style="padding-bottom: 50px;">
-            <div class="col-md-12 div_centro"> 
-                {{ btnHabilitarExibir() ? "Desabilitar Confirma?" : "Habilitar Confirma?" }}
+            <div v-if="carregando">
+                <div class="col-md-12 div_centro"><div class="carregando"></div></div>
+                <div class="col-md-12 div_centro">Aguarde</div>
             </div>
-            <div class="col-md-12 div_centro" style="padding-top: 10px;">
-                <button class="btnVerde" @click="desabilitaHabilita()" :disabled="!administrador">
-                    Salvar 
-                </button>
-            </div>            
+            <div v-else>
+                <div class="col-md-12 div_centro"> 
+                {{ btnHabilitarExibir() ? "Desabilitar Confirma?" : "Habilitar Confirma?" }}
+                </div>
+                <div class="col-md-12 div_centro" style="padding-top: 10px;">
+                    <button class="btnVerde" @click="desabilitaHabilita()" :disabled="!administrador">
+                        Salvar 
+                    </button>
+                </div>
+            </div>      
         </div>
+        
     </ModalApp>    
 
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->

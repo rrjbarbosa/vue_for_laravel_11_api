@@ -138,7 +138,7 @@
                 <button class="btnAmarelo"  @click="habilitaDesabilita()"   v-if="linhaSelecionada.ativo == 0 && !ocultaBtn"  :disabled="ocultaBtn" >Habilitar</button> 
                 <button class="btnVermelho" @click="admim()"                v-if="linhaSelecionada.ativo == 1 && linhaSelecionada.admin == 0 && !ocultaBtn">Transformar em Admin </button>
                 <button class="btnAmarelo"  @click="admim()"                v-if="linhaSelecionada.ativo == 1 && linhaSelecionada.admin == 1 && !ocultaBtn">Retirar acesso Admin </button>
-                <button class="btnAzul"                                     v-if="linhaSelecionada && ocultaBtn"> <div class="loader"></div>{{ocultaBtnMsg}}</button> 
+                <button class="btnAzul"                                     v-if="linhaSelecionada && ocultaBtn"> <div class="carregando"></div>{{ocultaBtnMsg}}</button> 
             </div>
         </div>
         <div class="container-fluid">
