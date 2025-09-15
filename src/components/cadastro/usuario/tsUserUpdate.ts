@@ -1,11 +1,41 @@
 export type tsEdicaoSenha = {
-  senha: String;
-  confirmarSenha: String;
-  id:String
+  senha: string;
+  confirmarSenha: string;
+  id:string
 }   
 
 export type tsCamposEdicao = {
-  name:  String;
-  email:  String;
-  email_envio_msg: String;
+  name:  string;
+  email:  string;
+  email_envio_msg: string;
+}
+
+export type tsDadosEdit = {
+  usuario?:{
+    id: string
+    name:  string;
+    email:  string;
+    email_envio_msg: string;
+  },
+  empresas?:{
+    id: string,
+    nome_fantasia: string,
+    cnpj: number,
+    cidade: string,
+    bairro: string,
+    ativo: number
+  },
+  setores?:{
+    id: string,
+    setor: string,
+    ativo: number
+  },
+  permissoes?:{
+    nome: string,
+    nome_exibicao: string
+  },
+  acessos?:{
+    id:string,
+    acesso: string
+  }
 }

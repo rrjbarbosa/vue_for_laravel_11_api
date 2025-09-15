@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { reactive } from 'vue';
-    import { ref, onMounted } from 'vue';
+    import { ref, onMounted, nextTick } from 'vue';
     import { codHeaderToken, codUserLogado } from '@/codigos'
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
@@ -14,34 +14,34 @@
     });
 
     interface tsCampos { 
-        id:             string | null,
-        nome_fantasia:  string | null,
-        cnpj:           string | null,
-        cidade:         string | null,
-        bairro:         string | null,
-        ativo:          number | null,
-        index:          number, 
-        css:            string | null,       
+        id:     string | null,
+        setor:  string | null,
+        ativo:  number | null,
+        index:  number, 
+        css:    string | null,       
     }
 
     interface tsImputFiltros { 
-        nome_fantasia:  string | null,
-        cnpj:           string | null,
-        cidade:         string | null,
-        bairro:         string | null,        
+        setor:  string | null,        
     }
 
     interface tsProps {
-        user_id: string;
+        dadosEdit: {
+            usuario?:{
+            id: string
+            }
+            setores?:{
+                id: string,
+                setor: string,
+                ativo: number
+            }
+        };
     }
 
     const props = defineProps<tsProps>();
        
     const inputFiltro = reactive<tsImputFiltros>({
-        nome_fantasia:'', 
-        cnpj:'', 
-        cidade:'', 
-        bairro:''
+        setor:''
     });
 
     const dados         = reactive<tsCampos[]>([]);
@@ -54,6 +54,7 @@
 
     onMounted(()=>{
         administrador.value = codUserLogado()['admin'] == 1 ? true : false
+        recarregaCss(props.dadosEdit.setores)
     })
 
     function pesquisar(){
@@ -62,10 +63,7 @@
 
     function limparPesquisa(){
         Object.assign(inputFiltro, {
-            nome_fantasia:'', 
-            cnpj:'', 
-            cidade:'', 
-            bairro:''
+            setor:''
         });
 
         gridPesquisa()
@@ -73,11 +71,8 @@
 
     const linhaSelecionada = reactive<tsCampos>({
         id:'',
-        nome_fantasia: '', 
-        cnpj: '', 
-        cidade:'', 
-        bairro:'',
-        ativo:2,
+        setor: '', 
+        ativo:0,
         index:0,
         css:'',
     });
@@ -101,7 +96,7 @@
     
     async function gridPesquisa(){
         let camposPesquisados       =  {...apenasInputsPreenchidos(inputFiltro)}
-        camposPesquisados.user_id   = props.user_id
+        camposPesquisados.user_id   = props.dadosEdit.usuario?.id
         try {
             const { data } = await axiosPlugin.post('empresas-em-user-update-grid', camposPesquisados, token);
             dados.splice(0, dados.length, ...[]);   //-Reseta dados
@@ -134,16 +129,16 @@
         );
     }
 
-    async function desabilitaHabilita(){
+    async function salvar(){
         carregando.value = true
-        let backDados = {id:linhaSelecionada.id, ativo:linhaSelecionada.ativo, user_id:props.user_id}
+        let backDados = {id:linhaSelecionada.id, ativo:linhaSelecionada.ativo, user_id:props.dadosEdit.usuario?.id}
         await axiosPlugin.patch(`empresas-em-user-update-habitita-desabilita/${linhaSelecionada.id}`, backDados, token)
         .then(() =>{
             carregando.value = false
             dados[linhaSelecionada.index].ativo = linhaSelecionada.ativo == 1 ? 0 : 1;      //-Atualiza array de objeto dados da grid
             recarregaCss(dados)                                                             //-Recarrega a exibição da grid
             linhaSelecionadaLimpar()
-            modalFechar('empresasParaUserUpdateHabilitaDesabilita')
+            modalFechar('setoresParaUserUpdateEditar')
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
             modalAbrir('empresasParaUserUpdateMsgOk')
         })
@@ -157,52 +152,20 @@
     function linhaSelecionadaLimpar(){
         Object.assign(linhaSelecionada, {   
             id:'',
-            ativo: 2, 
-            admin: '', 
-            name:'', 
-            email:'',
-            email_envio_msg:'',
+            ativo: '', 
+            setor: '', 
             css:'',
             index:0}
         ); 
     }
-
-    //********************************************************************************
-    //************************************[BTNS]***************************************
-    //*********************************************************************************
-    function btnDesabilitarDisabled(){
-        let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo == 1 ? false : true
-        return trueFalse
-    }
-    function btnDesabilitarExibir(){
-       let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo == 1 ? true : false
-       return trueFalse
-    }
-    
-    function btnHabilitarDisabled(){
-        let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.id && linhaSelecionada.ativo == 0 ? false : true
-        return trueFalse
-    }
-    function btnHabilitarExibir(){
-       let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo == 0  ? true : false
-       return trueFalse
-    }
-        
 </script>
 <!--=================================================================================================================-->
 <template >
     <div class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">
-        <button class="btnVermelho" 
-            v-if="btnDesabilitarExibir()" 
-            @click="modalAbrir('empresasParaUserUpdateHabilitaDesabilita')" 
-            :disabled="btnDesabilitarDisabled()">
-            Desabilitar
-        </button>
         <button class="btnVerde" 
-            v-if="btnHabilitarExibir()"
-            @click="modalAbrir('empresasParaUserUpdateHabilitaDesabilita')"
-            :disabled="btnHabilitarDisabled()">
-            Habilitar
+            @click="modalAbrir('setoresParaUserUpdateEditar')"
+            :disabled="!administrador">
+            Salvar
         </button>
         <button class="btnAzul" 
             @click="pesquisar()" 
@@ -218,43 +181,31 @@
     
     <div style="overflow-y: auto; margin-left: 3px;" >
         <div class=" div_thead tamTbl">
+            <div class=" div_th t50">
+                <div>---</div><br>                 
+            </div>
             <div class=" div_th t400">
-                Empresa <br> 
-                <input type="text" v-model="inputFiltro.nome_fantasia" class="inputBuscaTbl">
-            </div>
-            <div class=" div_th t200">
-                Cnpj <br>
-                 <input type="text" v-model="inputFiltro.cnpj" class="inputBuscaTbl">
-            </div>
-            <div class=" div_th t200">
-                Cidade  <br> 
-                <input type="text" v-model="inputFiltro.cidade"  class="inputBuscaTbl">
-            </div>
-            <div class=" div_th t200">
-                Bairro  <br> 
-                <input type="text" v-model="inputFiltro.bairro"  class="inputBuscaTbl">
+                Setor <br> 
+                <input type="text" v-model="inputFiltro.setor" class="inputBuscaTbl">
             </div>
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
         <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
+                <div class=" div_td t50 text-wrap" @click="linhaFoco(i, index)">
+                     
+                    <button v-if="i.ativo" class="btn btn-outline-success btnAtivado" @click="modalAbrir('setoresParaUserUpdateEditar')">&#10004;</button>
+                    <button v-else class="btn btn-outline-danger btnInativado" @click="modalAbrir('setoresParaUserUpdateEditar')">&#10008;</button>    
+
+                </div>
                 <div class=" div_td t400 text-wrap" @click="linhaFoco(i, index)">
-                    {{i.nome_fantasia }}
-                </div>
-                <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">
-                    {{i.cnpj}}
-                </div>
-                <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">
-                    {{i.cidade}}
-                </div>
-                <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">
-                    {{i.bairro}}
+                    {{i.setor }}
                 </div>
         </div>
     </div>
     
     <!-- MODAL HABILITA DESABILITA USER ===================================================================================== -->
-    <ModalApp   :isOpen="modal.empresasParaUserUpdateHabilitaDesabilita" @close="modalFechar('empresasParaUserUpdateHabilitaDesabilita')"  
-                :largura="'80%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Edição de Usuário" :mensagens="mensagensModal" >    
+    <ModalApp   :isOpen="modal.setoresParaUserUpdateEditar" @close="modalFechar('setoresParaUserUpdateEditar')"  
+                :largura="'80%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Edição de Setores" :mensagens="mensagensModal" >    
         
         <div class="row " style="padding-bottom: 50px;">
             <div v-if="carregando">
@@ -263,11 +214,11 @@
             </div>
             <div v-else>
                 <div class="col-md-12 div_centro"> 
-                {{ btnHabilitarExibir() ? "Desabilitar Confirma?" : "Habilitar Confirma?" }}
+                    Salvar Confirma?
                 </div>
                 <div class="col-md-12 div_centro" style="padding-top: 10px;">
-                    <button class="btnVerde" @click="desabilitaHabilita()" :disabled="!administrador">
-                        Salvar 
+                    <button class="btnVerde" @click="salvar()" :disabled="!administrador">
+                        Sim 
                     </button>
                 </div>
             </div>      
@@ -287,16 +238,8 @@
 <!--=================================================================================================================-->
 <style scoped>
     @import '@/assets/main.css';
-    .containerApp{
-        height: 600px;
-    }
-    .containerApp div{
-        width: 100%;
-        height: 600px;
-    }
-
     .tamTbl{
-        min-width: 1100px;
+        min-width: 450px;
     }
     .aguarde{
         background-color: rgb(243, 146, 20);
@@ -310,6 +253,18 @@
         color: #ff0000;
         font-weight: bold;
         font-size: 15px;
+    }
+
+    .btnAtivado{
+        font-weight: bold;
+        font-size: 12px;
+        padding: 0px;
+    }
+
+    .btnInativado{
+        font-weight: bold;
+        font-size: 12px;
+        padding: 0px;
     }
 
 

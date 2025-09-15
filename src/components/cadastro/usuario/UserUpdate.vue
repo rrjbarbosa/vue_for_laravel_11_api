@@ -3,8 +3,10 @@ import { onMounted, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { axiosPlugin } from '@/plugins/axios'
 import { codHeaderToken, codMsgInputsErros, codLimparObjetoReativo } from '@/codigos'
-import type {tsCamposEdicao, tsEdicaoSenha} from './tsUserUpdate.ts'
+import type {tsCamposEdicao, tsEdicaoSenha, tsDadosEdit} from './tsUserUpdate.ts'
 import EmpresasParaUserUpdate from '@/components/cadastro/empresas/EmpresasParaUserUpdate.vue'
+import SetoresParaUserUpdate from '@/components/cadastro/setores/SetoresParaUserUpdate.vue'
+
 import ModalApp from '@/components/diversos/modal/ModalApp.vue'
 import { modalAppCod } from '@/components/diversos/modal/modalAppCod.ts' 
 
@@ -14,17 +16,20 @@ const id                        = route.params.id as string
 const user                      = JSON.parse(sessionStorage.getItem('usuario_app') || 'null')
 const refAlturaDiv90            = ref<any>(null);
 const alturaDivUsuarioEmpresa   = ref<string>("0");
+const alturaDivSetor            = ref<string>("0");
 const alturaDentroNoventa       = ref<string>("0");
 const token                     = codHeaderToken()
 const admin                     = 0
 const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
 const mensagensModal = reactive<string[]>([]);
 const carregaEmpresas = ref<InstanceType<typeof EmpresasParaUserUpdate> | null>(null);
+const dadosEdit = reactive<tsDadosEdit>({});    
 
 onMounted(() => {
     edit()
-    alturaDivUsuarioEmpresa.value = ((refAlturaDiv90.value?.offsetHeight /2)-10)+'px' || '0px';
-    alturaDentroNoventa.value = (refAlturaDiv90.value?.offsetHeight-38)+'px' || '0px';
+    alturaDentroNoventa.value       = (refAlturaDiv90.value?.offsetHeight-38)+'px' || '0px';
+    alturaDivUsuarioEmpresa.value   = ((refAlturaDiv90.value?.offsetHeight /2)-10)+'px' || '0px';
+    alturaDivSetor.value            =  (refAlturaDiv90.value?.offsetHeight - 40)+'px';
 })
 
 async function edit(){    
@@ -35,7 +40,7 @@ async function edit(){
             camposEdicao[i] = data.usuario[i]
         }
         if(carregaEmpresas.value){ carregaEmpresas.value.recarregaCss(data.empresas)}
-                
+        Object.assign(dadosEdit, data);                
     }catch(error){
         console.error('Erro na requisição:', error);
     }        
@@ -196,10 +201,10 @@ function limpaMsgDigitarInputSenha(campo: String){
     </div> 
     <div style="height: 90%; margin-left: 3px;" ref="refAlturaDiv90">        
         <div class="row ">
-            <div class=" col-md-4 paddingZero">
+            <div class="col-md-4 paddingZero">
                 <div class="row paddingZero">
                     <div class=" col-md-12  borda paddingZero" :style="{ height: alturaDivUsuarioEmpresa }"  style="margin-top:6px">
-                        <div class="blocoVerde">USUÁRIO</div> 
+                        <div class="blocoVerdeEscuro">USUÁRIO</div> 
                         <div class="paddingTreis">
                             <div class="paddingZero" style="margin-top:6px">
                                 <button @click="edicaoUserAbreModal()"   class="btn btn-sm btn-success botao" :disabled="user.admin==0">Editar Usuário</button> 
@@ -213,33 +218,33 @@ function limpaMsgDigitarInputSenha(campo: String){
                             <div class=" paddingZero inputCss">{{ camposVisao.email_envio_msg }}</div>
                         </div>                        
                     </div>
-                    <div class=" col-md-12 borda paddingZero" :style="{ height: alturaDivUsuarioEmpresa }" style="margin-top:8px;">
-                        <div class="blocoVerde">EMPRESAS DO USUÁRIO</div> 
+                    <div class=" col-md-12 borda paddingZero" :style="{ height: alturaDivUsuarioEmpresa }" style="margin-top:8px; ">
+                        <div class="blocoVerdeEscuro">EMPRESAS DO USUÁRIO</div> 
                         <div class="paddingTreis">
                             <EmpresasParaUserUpdate :user_id="id" ref="carregaEmpresas"/>
                         </div>
                     </div>
                 </div>    
             </div>
-            <div class="paddingZero col-md-2" style="margin-top:6px; padding-left: 3px; ">
-                <div class="paddingZero borda">
-                    <div class="paddingZero blocoVerde">SETORES</div> 
-                    <div class="paddingZero" :style="{ height: alturaDentroNoventa }"> 
-                        SETORES DO USER  
-                    </div> 
+            <div class="col-md-2 paddingZero" style="margin-top:6px; padding-left: 3px;">
+                <div class="paddingZero borda" >
+                    <div class="paddingZero blocoVerdeEscuro">SETORES</div> 
+                    <div class="paddingZero" :style="{ height: alturaDivSetor }">
+                        <SetoresParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit"/>
+                    </div>
                 </div>   
             </div>    
-            <div class="paddingZero col-md-3" style="margin-top:6px; padding-left: 3px; ">
+            <div class="col-md-3 paddingZero" style="margin-top:6px; padding-left: 3px; ">
                 <div class="paddingZero borda">
-                    <div class="paddingZero blocoVerde">PERMISSÕES</div> 
+                    <div class="paddingZero blocoVerdeEscuro">PERMISSÕES</div> 
                     <div class="paddingZero" :style="{ height: alturaDentroNoventa }"> 
                         PERMISSÕES app
                     </div> 
                 </div>   
             </div>   
-            <div class="paddingZero col-md-3" style="margin-top:6px; padding-left: 3px; padding-right: 3px;">
+            <div class="col-md-3 paddingZero" style="margin-top:6px; padding-left: 3px; padding-right: 3px;">
                 <div class="paddingZero borda">
-                    <div class="paddingZero blocoVerde">ACESSOS</div> 
+                    <div class="paddingZero blocoVerdeEscuro">ACESSOS</div> 
                     <div class="paddingZero" :style="{ height: alturaDentroNoventa }"> 
                         ACESSOS app
                     </div> 
@@ -324,4 +329,5 @@ function limpaMsgDigitarInputSenha(campo: String){
 .msgErro{ng-bottom: 5px;
     font-weight: bold;
 }
+.blocoVerdeEscuro{background-color: #3d6d42; color: #ffffff; text-align: center;}
 </style>
