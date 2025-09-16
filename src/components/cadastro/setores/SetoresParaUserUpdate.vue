@@ -44,7 +44,12 @@
         setor:''
     });
 
-    const dados         = reactive<tsCampos[]>([]);
+    const dados         = reactive<tsCampos[]>([{
+        id:     '',
+        setor:  '',
+        ativo:  2,
+        index:  0, 
+        css:    '' }]);
     
     const token = codHeaderToken()
 
@@ -80,7 +85,8 @@
     function linhaFoco(linha: tsCampos, index:number){
         linha.index = index                                                             // Adiciona index para recarregar a grid        
         Object.assign(linhaSelecionada, linha);                                         // Object.assign para atualizar linha selecionada       
-       
+        dados[index].ativo = dados[index].ativo == 0 ? 1 : 0 
+
         let arrayObj = []
         for(let i of dados ){
             switch(true){
@@ -132,7 +138,7 @@
     async function salvar(){
         carregando.value = true
         let backDados = {id:linhaSelecionada.id, ativo:linhaSelecionada.ativo, user_id:props.dadosEdit.usuario?.id}
-        await axiosPlugin.patch(`empresas-em-user-update-habitita-desabilita/${linhaSelecionada.id}`, backDados, token)
+        await axiosPlugin.patch(`setores-em-user-update-update/${linhaSelecionada.id}`, dados, token)
         .then(() =>{
             carregando.value = false
             dados[linhaSelecionada.index].ativo = linhaSelecionada.ativo == 1 ? 0 : 1;      //-Atualiza array de objeto dados da grid
@@ -181,7 +187,7 @@
     
     <div style="overflow-y: auto; margin-left: 3px;" >
         <div class=" div_thead tamTbl">
-            <div class=" div_th t50">
+            <div class=" div_th t30">
                 <div>---</div><br>                 
             </div>
             <div class=" div_th t400">
@@ -191,13 +197,13 @@
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
         <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
-                <div class=" div_td t50 text-wrap" @click="linhaFoco(i, index)">
+                <div class=" div_td t30 altDiv text-wrap" @click="linhaFoco(i, index)">
                      
-                    <button v-if="i.ativo" class="btn btn-outline-success btnAtivado" @click="modalAbrir('setoresParaUserUpdateEditar')">&#10004;</button>
-                    <button v-else class="btn btn-outline-danger btnInativado" @click="modalAbrir('setoresParaUserUpdateEditar')">&#10008;</button>    
+                    <button v-if="i.ativo" class="btn btn-outline-success btnAtivado">&#10004;</button>
+                    <button v-else class="btn btn-outline-danger btnInativado">&#10008;</button>    
 
                 </div>
-                <div class=" div_td t400 text-wrap" @click="linhaFoco(i, index)">
+                <div class=" div_td t400 altDiv text-wrap" @click="linhaFoco(i, index)">
                     {{i.setor }}
                 </div>
         </div>
@@ -258,35 +264,48 @@
     .btnAtivado{
         font-weight: bold;
         font-size: 12px;
-        padding: 0px;
+        padding-left:5px;
+        padding-right:5px;
+        padding-top: 3px;
+        padding-bottom: 3px;
     }
 
     .btnInativado{
         font-weight: bold;
         font-size: 12px;
-        padding: 0px;
+        padding-left:7px;
+        padding-right:7px;
+        padding-top: 3px;
+        padding-bottom: 3px;
     }
 
 
     .t50{
-        width: '50px';
+        width: 50px;
+    }
+
+    .t30{
+        width: 35px;
     }
 
     .t100{
-        width: '100px';
+        width: 100px;
     }
 
     .t200{
-        width: '200px';
+        width: 200px;
     }
 
     .t400{
-        width: '400px';
+        width: 400px;
     }
 
     .centro{
         text-align: center;
     }
     .erroInputBorda {border: 2px solid red;}
+    .altDiv{
+        height: 30px;
+    }
     
 </style>
