@@ -137,13 +137,13 @@
 
     async function salvar(){
         carregando.value = true
-        let backDados = {id:linhaSelecionada.id, ativo:linhaSelecionada.ativo, user_id:props.dadosEdit.usuario?.id}
-        await axiosPlugin.patch(`setores-em-user-update-update/${linhaSelecionada.id}`, dados, token)
-        .then(() =>{
+        //const ids = Object.values(dados).map(item => item.id);
+        const idsAtivos = dados.filter(item => item.ativo === 1).map(item => item.id);    
+        await axiosPlugin.patch(`setor-user-em-user-update-salvar/${props.dadosEdit.usuario?.id}`,{setores:idsAtivos} , token)
+        .then(({data}) =>{
             carregando.value = false
-            dados[linhaSelecionada.index].ativo = linhaSelecionada.ativo == 1 ? 0 : 1;      //-Atualiza array de objeto dados da grid
-            recarregaCss(dados)                                                             //-Recarrega a exibição da grid
-            linhaSelecionadaLimpar()
+            dados.splice(0, dados.length)                                               //Limpa array objeto em reactive            
+            recarregaCss(data.dados)                                                    //-Recarrega a exibição da grid
             modalFechar('setoresParaUserUpdateEditar')
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
             modalAbrir('empresasParaUserUpdateMsgOk')
@@ -153,16 +153,6 @@
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('empresasParaUserUpdateMsgErro')
         })   
-    }
-
-    function linhaSelecionadaLimpar(){
-        Object.assign(linhaSelecionada, {   
-            id:'',
-            ativo: '', 
-            setor: '', 
-            css:'',
-            index:0}
-        ); 
     }
 </script>
 <!--=================================================================================================================-->
