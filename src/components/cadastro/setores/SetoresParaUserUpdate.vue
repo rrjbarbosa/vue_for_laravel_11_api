@@ -104,7 +104,7 @@
         let camposPesquisados       =  {...apenasInputsPreenchidos(inputFiltro)}
         camposPesquisados.user_id   = props.dadosEdit.usuario?.id
         try {
-            const { data } = await axiosPlugin.post('empresas-em-user-update-grid', camposPesquisados, token);
+            const { data } = await axiosPlugin.post('setor-user-em-user-update-grid', camposPesquisados, token);
             dados.splice(0, dados.length, ...[]);   //-Reseta dados
             recarregaCss(data.dados);
             delete data.dados;
@@ -138,7 +138,7 @@
     async function salvar(){
         carregando.value = true
         //const ids = Object.values(dados).map(item => item.id);
-        const idsAtivos = dados.filter(item => item.ativo === 1).map(item => item.id);    
+        const idsAtivos = dados.filter(item => item.ativo === 1).map(item => item.id);
         await axiosPlugin.patch(`setor-user-em-user-update-salvar/${props.dadosEdit.usuario?.id}`,{setores:idsAtivos} , token)
         .then(({data}) =>{
             carregando.value = false
@@ -177,9 +177,6 @@
     
     <div style="overflow-y: auto; margin-left: 3px;" >
         <div class=" div_thead tamTbl">
-            <div class=" div_th t30">
-                <div>---</div><br>                 
-            </div>
             <div class=" div_th t400">
                 Setor <br> 
                 <input type="text" v-model="inputFiltro.setor" class="inputBuscaTbl">
@@ -187,13 +184,9 @@
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
         <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
-                <div class=" div_td t30 altDiv text-wrap" @click="linhaFoco(i, index)">
-                     
-                    <button v-if="i.ativo" class="btn btn-outline-success btnAtivado">&#10004;</button>
-                    <button v-else class="btn btn-outline-danger btnInativado">&#10008;</button>    
-
-                </div>
                 <div class=" div_td t400 altDiv text-wrap" @click="linhaFoco(i, index)">
+                    <button v-if="i.ativo" class="btn btn-outline-success btnAtivado">&#10004;</button>
+                    <button v-else class="btn btn-outline-danger btnInativado">&#10008;</button>
                     {{i.setor }}
                 </div>
         </div>
