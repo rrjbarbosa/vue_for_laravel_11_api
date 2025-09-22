@@ -260,6 +260,22 @@ tr{ border: 1px solid #ced4da; color: #495057; }
     border: none;
     padding: 3px;
 }
+.btnCinza{
+    background-color: #4b4b49;
+    color: #ffffff;
+    border-radius: 5px;
+    margin: 0px 3px;
+    border: none;
+    padding: 3px;
+}
+.btnCinza:disabled{
+    background-color: #a7a5a2;
+    color: #000000;
+    border-radius: 5px;
+    margin: 0px 3px;
+    border: none;
+    padding: 3px;
+}
 /*----Circulo Carregando-----------------------------------------------------------*/
 .carregando {
   animation: is-rotating 1s infinite;

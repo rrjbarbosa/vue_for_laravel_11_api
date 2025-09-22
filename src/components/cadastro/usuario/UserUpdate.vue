@@ -5,7 +5,9 @@ import { axiosPlugin } from '@/plugins/axios'
 import { codHeaderToken, codMsgInputsErros, codLimparObjetoReativo } from '@/codigos'
 import type {tsCamposEdicao, tsEdicaoSenha, tsDadosEdit} from './tsUserUpdate.ts'
 import EmpresasParaUserUpdate from '@/components/cadastro/empresas/EmpresasParaUserUpdate.vue'
-import SetoresParaUserUpdate from '@/components/cadastro/setores/SetoresParaUserUpdate.vue'
+import SetoresParaUserUpdate from '@/components/cadastro/setores/SetoresParaUserUpdate.vue' 
+import PermissoesParaUserUpdate from '@/components/cadastro/permissoes/PermissoesParaUserUpdate.vue' 
+import AcessosParaUserUpdate from '@/components/cadastro/acessos/AcessosParaUserUpdate.vue' 
 
 import ModalApp from '@/components/diversos/modal/ModalApp.vue'
 import { modalAppCod } from '@/components/diversos/modal/modalAppCod.ts' 
@@ -21,9 +23,10 @@ const alturaDentroNoventa       = ref<string>("0");
 const token                     = codHeaderToken()
 const admin                     = 0
 const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
-const mensagensModal = reactive<string[]>([]);
-const carregaEmpresas = ref<InstanceType<typeof EmpresasParaUserUpdate> | null>(null);
-const dadosEdit = reactive<tsDadosEdit>({});    
+const mensagensModal            = reactive<string[]>([]);
+const carregaEmpresas           = ref<InstanceType<typeof EmpresasParaUserUpdate> | null>(null);
+const recarregaPermissoes       = ref<InstanceType<typeof PermissoesParaUserUpdate> | null>(null);    
+const dadosEdit                 = reactive<tsDadosEdit>({});    
 
 onMounted(() => {
     edit()
@@ -187,6 +190,10 @@ function limpaMsgDigitarInputSenha(campo: String){
     camposComErroSenha.value = camposComErroSenha.value.filter(item => item !== campo);
 }
 
+function carregaPermissoes(){
+    recarregaPermissoes.value?.recarregaCss(dadosEdit.permissoes)
+}
+
 //==========================================================================================================================================  
 </script>
 
@@ -233,21 +240,21 @@ function limpaMsgDigitarInputSenha(campo: String){
                         <SetoresParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit"/>
                     </div>
                 </div>   
-            </div>    
-            <div class="col-md-3 paddingZero" style="margin-top:6px; padding-left: 3px; ">
-                <div class="paddingZero borda">
+            </div>
+            <div class="col-md-3 paddingZero" style="margin-top:6px; padding-left: 3px;">
+                <div class="paddingZero borda" >
                     <div class="paddingZero blocoVerdeEscuro">PERMISSÕES</div> 
-                    <div class="paddingZero" :style="{ height: alturaDentroNoventa }"> 
-                        PERMISSÕES app
-                    </div> 
+                    <div class="paddingZero" :style="{ height: alturaDivSetor }">
+                        <PermissoesParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit" ref="recarregaPermissoes" />
+                    </div>
                 </div>   
-            </div>   
+            </div>
             <div class="col-md-3 paddingZero" style="margin-top:6px; padding-left: 3px; padding-right: 3px;">
-                <div class="paddingZero borda">
+                <div class="paddingZero borda" >
                     <div class="paddingZero blocoVerdeEscuro">ACESSOS</div> 
-                    <div class="paddingZero" :style="{ height: alturaDentroNoventa }"> 
-                        ACESSOS app
-                    </div> 
+                    <div class="paddingZero" :style="{ height: alturaDivSetor }">
+                        <AcessosParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit" @atualizaPermissoes="carregaPermissoes()"/>
+                    </div>
                 </div>   
             </div>
         </div>            
@@ -287,18 +294,21 @@ function limpaMsgDigitarInputSenha(campo: String){
             <div class="paddingZero div_centro">
                 <button @click="salvarSenha()"   class="btn btn-sm btn-success botao"  >Salvar</button>
             </div>             
-                           
-            <div class="label">Senha</div>                                    
-            <input type="password" v-model="camposEdicaoSenha.senha" @input="limpaMsgDigitarInputSenha('senha')"  
-                class="form-control inputCss" 
-                :class="{ erroInputBorda: camposComErroSenha.includes('senha') }"
-                placeholder="Digite a Senha">                                
-            
-            <div class="label">Confirme a Senha</div>                               
-            <input type="password" v-model="camposEdicaoSenha.confirmarSenha" @input="limpaMsgDigitarInputSenha('confirmarSenha')"  
-                class="form-control inputCss" 
-                :class="{ erroInputBorda: camposComErroSenha.includes('confirmarSenha') }"
-                placeholder="Confirme a Senha">                                         
+            <form >               
+                <div class="label">Senha</div>                                    
+                <input type="password" v-model="camposEdicaoSenha.senha" @input="limpaMsgDigitarInputSenha('senha')"  
+                    class="form-control inputCss" 
+                    :class="{ erroInputBorda: camposComErroSenha.includes('senha') }"
+                    placeholder="Digite a Senha"
+                    autocomplete="off">                                
+                
+                <div class="label">Confirme a Senha</div>                               
+                <input type="password" v-model="camposEdicaoSenha.confirmarSenha" @input="limpaMsgDigitarInputSenha('confirmarSenha')"  
+                    class="form-control inputCss" 
+                    :class="{ erroInputBorda: camposComErroSenha.includes('confirmarSenha') }"
+                    placeholder="Confirme a Senha"
+                    autocomplete="off">                                         
+            </form>    
         </div>
     </ModalApp>    
     <!-- MODAL MSG ERRO ====================================================================================================== -->
