@@ -70,23 +70,15 @@
         Object.assign(inputFiltro, {
             nome_exibicao:''
         });
-
         gridPesquisa()
     }
 
     async function gridPesquisa(){
-        let camposPesquisados       =  {...apenasInputsPreenchidos(inputFiltro)}
-        camposPesquisados.user_id   = props.dadosEdit.usuario?.id
-        try {
-            const { data } = await axiosPlugin.post('acesso-user-em-user-update-grid', camposPesquisados, token);
-            dados.splice(0, dados.length, ...[]);   //-Reseta dados
-            recarregaCss(data.dados);
-            delete data.dados;
-
-        } catch (error:any) {
-            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
-            modalAbrir('empresasParaUserUpdateMsgErro')
-        }
+        let dadospesqusados =  props?.dadosEdit?.permissoes?.filter(item =>
+        item.nome_exibicao.toLowerCase().includes(inputFiltro?.nome_exibicao?.toLowerCase() )
+      ) 
+      dados.splice(0, dados.length, ...[]);   //-Reseta dados
+      Object.assign(dados, dadospesqusados);
     }
 
     function recarregaCss(dadosCss: any){                

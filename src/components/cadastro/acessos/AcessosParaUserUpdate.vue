@@ -5,6 +5,7 @@
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
+    import AcessosApp from '@/components/cadastro/acessos/AcessosApp.vue'
 
     const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
     const mensagensModal = reactive<string[]>([]);
@@ -109,18 +110,12 @@
     }
     
     async function gridPesquisa(){
-        let camposPesquisados       =  {...apenasInputsPreenchidos(inputFiltro)}
-        camposPesquisados.user_id   = props.dadosEdit.usuario?.id
-        try {
-            const { data } = await axiosPlugin.post('acesso-user-em-user-update-grid', camposPesquisados, token);
-            dados.splice(0, dados.length, ...[]);   //-Reseta dados
-            recarregaCss(data.dados);
-            delete data.dados;
+       let dadospesqusados =  props?.dadosEdit?.acessos?.filter(item =>
+        item.acesso.toLowerCase().includes(inputFiltro?.acesso?.toLowerCase() )
+      ) 
+      dados.splice(0, dados.length, ...[]);   //-Reseta dados
+      Object.assign(dados, dadospesqusados);
 
-        } catch (error:any) {
-            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
-            modalAbrir('acessosParaUserUpdateMsgErro')
-        }
     }
 
     function recarregaCss(dadosCss: any){                
@@ -231,11 +226,7 @@
     <!-- MODAL MODELOS DE ACESSO============================================================================================= -->
     <ModalApp   :isOpen="modal.modelosParaUserUpdateEditar" @close="modalFechar('modelosParaUserUpdateEditar')"  
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Modelos de Acessos" :mensagens="mensagensModal" >    
-        
-        <div class="row " style="padding-bottom: 50px;">
-            Componente Modelos de Acessos      
-        </div>
-        
+        <AcessosApp/>
     </ModalApp>    
 
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
