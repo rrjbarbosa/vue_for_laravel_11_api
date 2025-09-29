@@ -66,6 +66,8 @@
 
     const carregando = ref(false)
 
+    const carregaModeloAcesso = ref<any>(null)
+
     onMounted(()=>{
         administrador.value = codUserLogado()['admin'] == 1 ? true : false
         recarregaCss(props.dadosEdit.acessos)
@@ -158,6 +160,10 @@
             modalAbrir('acessosParaUserUpdateMsgErro')
         })   
     }
+    function modelosDaAcessos(){
+        carregaModeloAcesso.value.acessoAppLimparLinhaSelecionada()
+        modalAbrir('modelosParaUserUpdateEditar')
+    }
 </script>
 <!--=================================================================================================================-->
 <template >
@@ -178,7 +184,7 @@
             Limpar
         </button>
         <button class="btnCinza" 
-            @click="modalAbrir('modelosParaUserUpdateEditar')" 
+            @click="modelosDaAcessos()"
             :disabled="!administrador">
             Modelos
         </button>        
@@ -226,7 +232,7 @@
     <!-- MODAL MODELOS DE ACESSO============================================================================================= -->
     <ModalApp   :isOpen="modal.modelosParaUserUpdateEditar" @close="modalFechar('modelosParaUserUpdateEditar')"  
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Modelos de Acessos" :mensagens="mensagensModal" >    
-        <AcessosApp/>
+        <AcessosApp :dadosEdit="dadosEdit" ref="carregaModeloAcesso"/>
     </ModalApp>    
 
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
