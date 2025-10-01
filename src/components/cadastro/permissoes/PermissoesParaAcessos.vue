@@ -143,7 +143,7 @@
     async function salvar(){
         carregando.value = true
         const idsAtivos = dadosPesquisados.filter(item => item.ativo === 1).map(item => item.id);
-        await axiosPlugin.patch(`acesso-user-em-user-update-salvar/${props?.acessor_id}`,{permissoes:idsAtivos} , token)
+        await axiosPlugin.patch(`permissao-por-acesso-salvar/${props?.acessor_id}`,{permissoes:idsAtivos} , token)
         .then(({data}) =>{
             carregando.value = false
             dados.splice(0, dados.length, ...[]);                           //-Reseta dados
@@ -176,7 +176,9 @@
                         Permissões
                         <span class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">
                             <button class="btnVerde" 
-                                :disabled="!administrador">
+                                :disabled="!administrador"
+                                @click="modalAbrir('permissoesParaAcessosConfirmaSalvar')">
+                                
                                 Salvar
                             </button>
                             <button class="btnAzul" 
@@ -207,6 +209,22 @@
             <ModulosApp ref="carregaModulos"/>
         </div>
     </div>
+    
+    <!-- MODAL CONFIRMA SALVAR=============================================================================================== -->
+    <ModalApp   :isOpen="modal.permissoesParaAcessosConfirmaSalvar" @close="modalFechar('permissoesParaAcessosConfirmaSalvar')" 
+                :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal">
+        <div v-if="carregando">
+            <div class="col-md-12 div_centro"><div class="carregando"></div></div>
+        <div class="col-md-12 div_centro">Aguarde</div>
+            </div>
+        <div v-else>
+            <div>Salvar Confirma?</div>
+            <button class="btnVerde" :disabled="!administrador" @click="salvar()">
+                Salvar
+            </button>
+        </div>
+    </ModalApp>
+
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
     <ModalApp   :isOpen="modal.permissoesParaAcessosMsgErro" @close="modalFechar('permissoesParaAcessosMsgErro')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'obs'" title="" :mensagens="mensagensModal"/>
