@@ -15,6 +15,7 @@
     });
 
     interface tsCampos { 
+        id:             string | null,
         nome:           string | null,
         nome_exibicao:  string|null,
         ativo:          number | null,
@@ -37,6 +38,7 @@
     });
 
     const dados         = reactive<tsCampos[]>([{
+        id:    '',
         nome:  '',
         nome_exibicao:'',
         ativo:  2,
@@ -44,6 +46,7 @@
         css:    '' }]);
 
     const dadosPesquisados = reactive<tsCampos[]>([{
+        id: '',
         nome:  '',
         nome_exibicao:'',
         ativo:  2,
@@ -108,6 +111,59 @@
             modalAbrir('permissoesParaAcessosMsgErro')
         }
     }
+
+    function linhaFoco(linha: tsCampos, index:number){
+        linha.index = index                                                             // Adiciona index para recarregar a grid        
+        Object.assign(linhaSelecionada, linha);                                         // Object.assign para atualizar linha selecionada       
+        dadosPesquisados[index].ativo = dadosPesquisados[index].ativo == 0 ? 1 : 0 
+
+        let arrayObj = []
+        for(let i of dados ){
+            switch(true){
+                case i.ativo == 1 && i.id == linhaSelecionada.id :     i.css =  'ativoSelect';    break;
+                case i.ativo == 0 && i.id == linhaSelecionada.id :   i.css =  'inativoSelect';  break;
+                case i.ativo == 1  :                                   i.css =  'ativo';          break;
+                case i.ativo == 0  :                                 i.css =  'inativo';        break;            
+            }
+            arrayObj.push(i);
+        } 
+        dadosPesquisados.splice(0, dadosPesquisados.length, ...[]);     //-Reseta dados
+        Object.assign(dadosPesquisados, arrayObj);
+    }
+
+    const linhaSelecionada = reactive<tsCampos>({
+        id:'',
+        nome:'',
+        nome_exibicao: '', 
+        ativo:2,
+        index:0,
+        css:'',
+    });
+
+    async function salvar(){
+        carregando.value = true
+        const idsAtivos = dadosPesquisados.filter(item => item.ativo === 1).map(item => item.id);
+        await axiosPlugin.patch(`acesso-user-em-user-update-salvar/${props?.acessor_id}`,{permissoes:idsAtivos} , token)
+        .then(({data}) =>{
+            carregando.value = false
+            dados.splice(0, dados.length, ...[]);                           //-Reseta dados
+            Object.assign(dados, dadosPesquisados);                         //-Atualiza Dados
+
+            modalFechar('acessosParaUserUpdateEditar')
+            Object.assign(mensagensModal, ['Salvo com Sucesso']);
+            modalAbrir('acessosParaUserUpdateMsgOk')
+        })
+        .catch(error =>{
+            carregando.value = false
+            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+            modalAbrir('acessosParaUserUpdateMsgErro')
+        })   
+    }
+    function modelosDaAcessos(){
+        carregaModeloAcesso.value.acessoAppLimparLinhaSelecionada()
+        modalAbrir('modelosParaUserUpdateEditar')
+    }
+
 </script>
 <!--=================================================================================================================-->
 <template >
@@ -133,16 +189,16 @@
                                 :disabled="!administrador">
                                 Limpar
                             </button>        
-                        </span> <br> 
+                        </span> <br>
                         <input type="text" v-model="inputFiltro.nome_exibicao" class="inputBuscaTbl">
                     </div>
                     <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
                 </div>
                 <div class=" div_tbody tamTbl " v-for="(i, index) in dadosPesquisados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
                         <div class=" div_td altDiv text-wrap" style="width: 100%;">
-                            <button v-if="i.ativo" class="btn btn-outline-success btnAtivado">&#10004;</button>
-                            <button v-else class="btn btn-outline-danger btnInativado">&#10008;</button>
-                            {{i.nome_exibicao }}
+                            <button v-if="i.ativo" class="btn btn-outline-success btnAtivado" @click="linhaFoco(i, index)">&#10004;</button>
+                            <button v-else class="btn btn-outline-danger btnInativado" @click="linhaFoco(i, index)">&#10008;</button>
+                            <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">{{i.nome_exibicao }}</div>
                         </div>
                 </div>
             </div>
