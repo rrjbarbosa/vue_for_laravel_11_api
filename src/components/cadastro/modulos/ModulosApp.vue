@@ -92,12 +92,10 @@
 </script>
 <!--=================================================================================================================-->
 <template >
-    
-    
     <div style="overflow-y: auto; margin-left: 3px;" >
         <div class=" div_thead tamTbl">
+            <div class="div_centro cssModulos">MÓDULOS</div>
             <div class=" div_th" style="width: 100%;">
-                Módulos 
                 <span class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">
                     <button class="btnAzul" 
                         @click="pesquisar()" 
@@ -197,6 +195,10 @@
     .erroInputBorda {border: 2px solid red;}
     .altDiv{
         height: 30px;
+    }
+    .cssModulos{
+        background-color: rgb(32, 87, 69);
+        color: #ffffff;
     }
     
 </style>

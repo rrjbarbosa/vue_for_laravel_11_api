@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { reactive } from 'vue';
-    import { ref, onMounted, nextTick } from 'vue';
+    import { Ref, ref, onMounted, nextTick } from 'vue';
     import { codHeaderToken, codUserLogado } from '@/codigos'
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
@@ -44,11 +44,12 @@
                 nome_exibicao:  string,
                 ativo:          number
             }
-        };
+        }
+        
     }
 
     const props = defineProps<tsProps>();
-       
+      
     const inputFiltro = reactive<tsImputFiltros>({
         acesso:''
     });
@@ -109,6 +110,7 @@
             arrayObj.push(i);
         } 
         Object.assign(dados, arrayObj);
+        
     }
     
     async function gridPesquisa(){
@@ -186,10 +188,9 @@
         <button class="btnCinza" 
             @click="modelosDaAcessos()"
             :disabled="!administrador">
-            Modelos
-        </button>        
+            Editar Acessos
+        </button>     
     </div>
-    
     <div style="overflow-y: auto; margin-left: 3px;" >
         <div class=" div_thead tamTbl">
             <div class=" div_th t400">

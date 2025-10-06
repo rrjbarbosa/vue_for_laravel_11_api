@@ -1,11 +1,12 @@
 <script setup lang="ts">
-    import { onUpdated, reactive } from 'vue';
+    import { reactive } from 'vue';
     import { ref, onMounted, nextTick } from 'vue';
     import { codHeaderToken, codUserLogado } from '@/codigos'
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
     import ModulosApp from '@/components/cadastro/modulos/ModulosApp.vue'
+    import { inject } from 'vue'
 
     const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
     const mensagensModal = reactive<string[]>([]);
@@ -13,6 +14,8 @@
     defineExpose({
         gridPermissoesParaAcesso
     });
+
+    const emit = defineEmits([''])
 
     interface tsCampos { 
         id:             string | null,
@@ -140,18 +143,16 @@
         css:'',
     });
 
+    const chamarUserUpdateEdit = inject<() => void>('chamarUserUpdateEdit')
+
     async function salvar(){
         carregando.value = true
         const idsAtivos = dadosPesquisados.filter(item => item.ativo === 1).map(item => item.id);
         await axiosPlugin.patch(`permissao-por-acesso-salvar/${props?.acessor_id}`,{permissoes:idsAtivos} , token)
         .then(({data}) =>{
             carregando.value = false
-            dados.splice(0, dados.length, ...[]);                           //-Reseta dados
-            Object.assign(dados, dadosPesquisados);                         //-Atualiza Dados
-
-            modalFechar('acessosParaUserUpdateEditar')
-            Object.assign(mensagensModal, ['Salvo com Sucesso']);
-            modalAbrir('acessosParaUserUpdateMsgOk')
+            modalFechar('permissoesParaAcessosConfirmaSalvar')
+            chamarUserUpdateEdit?.()
         })
         .catch(error =>{
             carregando.value = false
@@ -159,26 +160,19 @@
             modalAbrir('acessosParaUserUpdateMsgErro')
         })   
     }
-    function modelosDaAcessos(){
-        carregaModeloAcesso.value.acessoAppLimparLinhaSelecionada()
-        modalAbrir('modelosParaUserUpdateEditar')
-    }
-
 </script>
 <!--=================================================================================================================-->
 <template >
     <div class="row paddingZero">
         <div class="col-md-6 paddingZero">    
-                        
             <div style="overflow-y: auto; margin-left: 3px;" >
+                <div class="div_centro cssPermissoes">PERMISSÕES</div>
                 <div class=" div_thead tamTbl">
                     <div class=" div_th" style="width: 100%;">
-                        Permissões
                         <span class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">
                             <button class="btnVerde" 
                                 :disabled="!administrador"
-                                @click="modalAbrir('permissoesParaAcessosConfirmaSalvar')">
-                                
+                                @click="modalAbrir('permissoesParaAcessosConfirmaSalvar')">                                
                                 Salvar
                             </button>
                             <button class="btnAzul" 
@@ -217,11 +211,11 @@
             <div class="col-md-12 div_centro"><div class="carregando"></div></div>
         <div class="col-md-12 div_centro">Aguarde</div>
             </div>
-        <div v-else>
-            <div>Salvar Confirma?</div>
-            <button class="btnVerde" :disabled="!administrador" @click="salvar()">
-                Salvar
-            </button>
+        <div v-else >
+            <div class=" div_centro">Salvar Confirma?</div></br>
+            <div class="div_centro">
+                <button class="btnVerde" :disabled="!administrador" @click="salvar()">Salvar</button>            
+            </div>
         </div>
     </ModalApp>
 
@@ -299,6 +293,11 @@
     .erroInputBorda {border: 2px solid red;}
     .altDiv{
         height: 30px;
+    }
+
+    .cssPermissoes{
+        background-color: rgb(32, 87, 69);
+        color: #ffffff;
     }
     
 </style>

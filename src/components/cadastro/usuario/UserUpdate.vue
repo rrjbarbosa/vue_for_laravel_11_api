@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, ref, reactive, onUpdated } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { axiosPlugin } from '@/plugins/axios'
 import { codHeaderToken, codMsgInputsErros, codLimparObjetoReativo } from '@/codigos'
@@ -8,6 +8,7 @@ import EmpresasParaUserUpdate from '@/components/cadastro/empresas/EmpresasParaU
 import SetoresParaUserUpdate from '@/components/cadastro/setores/SetoresParaUserUpdate.vue' 
 import PermissoesParaUserUpdate from '@/components/cadastro/permissoes/PermissoesParaUserUpdate.vue' 
 import AcessosParaUserUpdate from '@/components/cadastro/acessos/AcessosParaUserUpdate.vue' 
+import { provide } from 'vue'
 
 import ModalApp from '@/components/diversos/modal/ModalApp.vue'
 import { modalAppCod } from '@/components/diversos/modal/modalAppCod.ts' 
@@ -25,8 +26,9 @@ const admin                     = 0
 const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
 const mensagensModal            = reactive<string[]>([]);
 const carregaEmpresas           = ref<InstanceType<typeof EmpresasParaUserUpdate> | null>(null);
-const recarregaPermissoes       = ref<InstanceType<typeof PermissoesParaUserUpdate> | null>(null);    
+const recarregaPermissoes       = ref<InstanceType<typeof PermissoesParaUserUpdate> | null>(null);
 const dadosEdit                 = reactive<tsDadosEdit>({});    
+const userUpdateRecarregar      = ref<string>("nao");
 
 onMounted(() => {
     edit()
@@ -35,19 +37,30 @@ onMounted(() => {
     alturaDivSetor.value            =  (refAlturaDiv90.value?.offsetHeight - 40)+'px';
 })
 
+provide('chamarUserUpdateEdit', userUpdateRecarregarEdit)
+
+function userUpdateRecarregarEdit(){
+    userUpdateRecarregar.value = 'sim'
+    modalAbrir('userUpdateRecarregar');
+    edit()
+}
+
 async function edit(){    
     try{
         const { data } = await axiosPlugin.put('users-edit', {id:id}, token);
-        for (const i of Object.keys(camposVisao) as (keyof tsCamposEdicao)[]) {
-            camposVisao[i]  = data.usuario[i]
-            camposEdicao[i] = data.usuario[i]
-        }
+        Object.assign(dadosEdit, resetaCampos);                                         //-Reseta dadosEdit
+        Object.assign(camposVisao, resetaCamposVisao);                                  //-Reseta dadosEdit
+        
+        Object.assign(camposVisao, data.usuario);                                       //-Seta Users na Visão
+        Object.assign(dadosEdit, data);                                                 //-Seta dados para Edição
+        
         if(carregaEmpresas.value){ carregaEmpresas.value.recarregaCss(data.empresas)}
-        Object.assign(dadosEdit, data);                
+        userUpdateRecarregar.value == 'sim' ? userUpdateRecarregar.value = 'nao' : null
     }catch(error){
-        console.error('Erro na requisição:', error);
+        Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+        modalAbrir('userUpdateMsgErro')
     }        
-}   
+}
 
 function retornaGrid(){    
     router.push('/user-grid')
@@ -59,14 +72,26 @@ const camposVisao = reactive<tsCamposEdicao>({
   email: '',
   email_envio_msg: ''
 })
+const resetaCamposVisao = {
+    name: '',
+    email: '',
+    email_envio_msg: ''
+                    };
 //==============================================================[Edição Users]========================================================
 const camposComErro             = ref<string[]>([])
 
 const camposEdicao = reactive<tsCamposEdicao>({
-  name:'',
-  email:'',
-  email_envio_msg:''
+  name:             '',
+  email:            '',
+  email_envio_msg:  ''
 })
+
+const resetaCampos = {
+    id:                 '',
+    name:               '',
+    email:              '',
+    email_envio_msg:    ''
+};
 
 function edicaoUserAbreModal(){
     for (const i of Object.keys(camposEdicao) as (keyof tsCamposEdicao)[]) {
@@ -211,7 +236,7 @@ function carregaPermissoes(){
             <div class="col-md-4 paddingZero">
                 <div class="row paddingZero">
                     <div class=" col-md-12  borda paddingZero" :style="{ height: alturaDivUsuarioEmpresa }"  style="margin-top:6px">
-                        <div class="blocoVerdeEscuro">USUÁRIO</div> 
+                        <div class="blocoVerdeEscuro">USUÁRIO</div>
                         <div class="paddingTreis">
                             <div class="paddingZero" style="margin-top:6px">
                                 <button @click="edicaoUserAbreModal()"   class="btn btn-sm btn-success botao" :disabled="user.admin==0">Editar Usuário</button> 
@@ -310,6 +335,19 @@ function carregaPermissoes(){
                     autocomplete="off">                                         
             </form>    
         </div>
+    </ModalApp>
+    <!-- MODAL RECARREGA USER UPDATE, APÓS SALVAR PermissoesParaAcessos ====================================================== -->
+    <ModalApp   :isOpen="modal.userUpdateRecarregar" @close="userUpdateRecarregar = 'nao', modalFechar('userUpdateRecarregar') " 
+                :largura="'50%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Ok" :mensagens="mensagensModal">    
+        <div v-if="userUpdateRecarregar == 'sim'">
+            <div class="col-md-12 div_centro">
+                <div class="paddingDez">Aguarde Recarregando...</div>
+                <div class="carregando"></div>
+            </div>
+        </div>
+        <div v-else>
+            <div class="paddingDez div_centro">Salvo com Sucesso</div>
+        </div>    
     </ModalApp>    
     <!-- MODAL MSG ERRO ====================================================================================================== -->
     <ModalApp   :isOpen="modal.userUpdateMsgErro" @close="modalFechar('userUpdateMsgErro')" 

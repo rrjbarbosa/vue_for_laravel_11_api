@@ -125,12 +125,15 @@
         carregaPermissoes.value.gridPermissoesParaAcesso(linhaSelecionada.id)
         modalAbrir('permissoesParaAcessoApp')
     }
+    
     function btnEditarPermissaoAcesso(){
         if(!linhaSelecionada.id || !administrador){
             return true
         }
         return false
     }
+
+    
 </script>
 <!--=================================================================================================================-->
 <template >

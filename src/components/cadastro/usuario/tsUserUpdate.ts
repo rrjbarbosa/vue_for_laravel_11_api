@@ -37,5 +37,6 @@ export type tsDadosEdit = {
   acessos?:{
     id:string,
     acesso: string
-  }
+  },
+  recarregaUserUpdate?:string
 }
