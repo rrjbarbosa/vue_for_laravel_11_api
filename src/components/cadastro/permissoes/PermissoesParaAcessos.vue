@@ -76,15 +76,13 @@
         Object.assign(inputFiltro, {
             nome_exibicao:null
         });
-        gridPesquisa()
+        Object.assign(dadosPesquisados, dados);  
     }
 
     async function gridPesquisa(){
-        let pesquisados =  dados?.filter(item =>
-        item?.nome_exibicao?.toLowerCase().includes(inputFiltro?.nome_exibicao?.toLowerCase() )
-      ) 
-      dadosPesquisados.splice(0, dados.length, ...[]);   //-Reseta dados
-      Object.assign(dadosPesquisados, pesquisados);
+        let pesquisados =  dados?.filter(item => item?.nome_exibicao?.toLowerCase().includes(inputFiltro?.nome_exibicao?.toLowerCase() )) 
+        dadosPesquisados.splice(0, dados.length, ...[]);   //-Reseta dados
+        Object.assign(dadosPesquisados, pesquisados);
     }
 
     function recarregaCss(dadosCss: any){                
@@ -155,9 +153,11 @@
             chamarUserUpdateEdit?.()
         })
         .catch(error =>{
-            carregando.value = false
-            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
-            modalAbrir('acessosParaUserUpdateMsgErro')
+            let erros           = error.response.data.errors ? error.response.data.errors : {"msgsAuthorize":["Erro Inesperado"],"inputs":[{}]}
+            carregando.value    = false
+            Object.assign(mensagensModal, modalMsgErro(erros));
+            modalFechar('permissoesParaAcessosConfirmaSalvar')
+            modalAbrir('permissoesParaAcessosMsgErro')
         })   
     }
 </script>
@@ -177,12 +177,12 @@
                             </button>
                             <button class="btnAzul" 
                                 @click="pesquisar()" 
-                                :disabled="!administrador">
+                                :disabled="!administrador || !inputFiltro.nome_exibicao">
                                 Pesquisar
                             </button> 
                             <button class="btnAmarelo" 
                                 @click="limparPesquisa()" 
-                                :disabled="!administrador">
+                                :disabled="!administrador || !inputFiltro.nome_exibicao">
                                 Limpar
                             </button>        
                         </span> <br>
