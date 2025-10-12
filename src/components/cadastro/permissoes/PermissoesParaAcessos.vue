@@ -1,11 +1,10 @@
 <script setup lang="ts">
     import { reactive } from 'vue';
     import { ref, onMounted, nextTick } from 'vue';
-    import { codHeaderToken, codUserLogado } from '@/codigos'
+    import { codHeaderToken, codUserLogado, codAlturaGridEmModal} from '@/codigos'
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
-    import ModulosApp from '@/components/cadastro/modulos/ModulosApp.vue'
     import { inject } from 'vue'
 
     const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
@@ -62,7 +61,8 @@
 
     const carregando = ref(false)
 
-    const carregaModulos = ref<any>(null);
+    
+    const minhaDiv = ref(null);
 
     onMounted(()=>{
         administrador.value = codUserLogado()['admin'] == 1 ? true : false
@@ -97,6 +97,20 @@
         Object.assign(dados, arrayObj);
     }
 
+    function marcarTodos(){
+        dados.forEach(obj => {
+            obj.ativo = 1;
+        });
+        recarregaCss(dados)
+    }
+
+    function desmarcarTodos(){
+        dados.forEach(obj => {
+            obj.ativo = 0;
+        });
+        recarregaCss(dados)
+    }
+
     async function gridPermissoesParaAcesso(acessor_id){
         try {
             dados.splice(0, dados.length, ...[]);                           //-Reseta dados
@@ -105,7 +119,6 @@
             const { data } = await axiosPlugin.post('permissao-por-acesso', {acessor_id:acessor_id }, token);
             recarregaCss(data.permissoes);                      //-Seta permssões
             Object.assign(dadosPesquisados, dados);             //-Seta dadosPesquisados com css estilizado
-            carregaModulos.value.setaDados(data.modulos)
             delete data.permissoes;
         } catch (error:any) {
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
@@ -163,44 +176,48 @@
 </script>
 <!--=================================================================================================================-->
 <template >
-    <div class="row paddingZero">
-        <div class="col-md-6 paddingZero">    
-            <div style="overflow-y: auto; margin-left: 3px;" >
-                <div class="div_centro cssPermissoes">PERMISSÕES</div>
-                <div class=" div_thead tamTbl">
-                    <div class=" div_th" style="width: 100%;">
-                        <span class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">
-                            <button class="btnVerde" 
-                                :disabled="!administrador"
-                                @click="modalAbrir('permissoesParaAcessosConfirmaSalvar')">                                
-                                Salvar
-                            </button>
-                            <button class="btnAzul" 
-                                @click="pesquisar()" 
-                                :disabled="!administrador || !inputFiltro.nome_exibicao">
-                                Pesquisar
-                            </button> 
-                            <button class="btnAmarelo" 
-                                @click="limparPesquisa()" 
-                                :disabled="!administrador || !inputFiltro.nome_exibicao">
-                                Limpar
-                            </button>        
-                        </span> <br>
-                        <input type="text" v-model="inputFiltro.nome_exibicao" class="inputBuscaTbl">
+    <div class="row paddingZero " >
+        <div class="col-md-12 paddingZero">
+            <div class=" div_thead tamTbl">                
+                <div class="div_centro" style="padding: 3px;">
+                    <button class="btnVerde" 
+                        :disabled="!administrador"
+                        @click="modalAbrir('permissoesParaAcessosConfirmaSalvar')">                                
+                        Salvar  
+                    </button>
+                    <button class="btnAzul" 
+                        @click="pesquisar()" 
+                        :disabled="!administrador || !inputFiltro.nome_exibicao">
+                        Pesquisar
+                    </button> 
+                    <button class="btnAmarelo" 
+                        @click="limparPesquisa()" 
+                        :disabled="!administrador || !inputFiltro.nome_exibicao">
+                        Limpar Pesquisa
+                    </button>
+                    <button class="btnAzul" 
+                        @click="marcarTodos()" 
+                        :disabled="!administrador">
+                        Marcar Todos
+                    </button>
+                    <button class="btnVermelho" 
+                        @click="desmarcarTodos()" 
+                        :disabled="!administrador">
+                        Desmarcar Todos
+                    </button> 
+                </div> 
+                <input type="text" v-model="inputFiltro.nome_exibicao" class="inputBuscaTbl">
+                <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
+            </div>
+            <div style="overflow-y: auto; margin-left: 3px;" :style="{ height: codAlturaGridEmModal()}">
+                <div class=" div_tbody tamTbl "  v-for="(i, index) in dadosPesquisados" :key="index" @click="linhaFoco(i, index)" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
+                    <div class=" div_td altDiv text-wrap" style="width: 100%;" >
+                        <button v-if="i.ativo" class="btn btn-outline-success btnAtivado" >&#10004;</button>
+                        <button v-else class="btn btn-outline-danger btnInativado" >&#10008;</button>
+                        {{i.nome_exibicao }}
                     </div>
-                    <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
-                </div>
-                <div class=" div_tbody tamTbl " v-for="(i, index) in dadosPesquisados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
-                        <div class=" div_td altDiv text-wrap" style="width: 100%;">
-                            <button v-if="i.ativo" class="btn btn-outline-success btnAtivado" @click="linhaFoco(i, index)">&#10004;</button>
-                            <button v-else class="btn btn-outline-danger btnInativado" @click="linhaFoco(i, index)">&#10008;</button>
-                            <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">{{i.nome_exibicao }}</div>
-                        </div>
                 </div>
             </div>
-        </div>    
-        <div class="col-md-6 paddingZero">
-            <ModulosApp ref="carregaModulos"/>
         </div>
     </div>
     
@@ -232,7 +249,7 @@
 <style scoped>
     @import '@/assets/main.css';
     .tamTbl{
-        min-width: 450px;
+        min-width: 200px;
     }
     .aguarde{
         background-color: rgb(243, 146, 20);
@@ -266,7 +283,6 @@
         padding-bottom: 3px;
     }
 
-
     .t50{
         width: 50px;
     }
@@ -294,10 +310,4 @@
     .altDiv{
         height: 30px;
     }
-
-    .cssPermissoes{
-        background-color: rgb(32, 87, 69);
-        color: #ffffff;
-    }
-    
 </style>

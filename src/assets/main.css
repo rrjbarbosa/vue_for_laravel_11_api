@@ -95,7 +95,8 @@
 /* ************** [ TABELA DIV ] ************************************************** */
 .div_thead{ 
             background-color: #A3CDA8; 
-            padding: 0px;
+            padding-top: 3px;
+            padding-bottom: 3px;
             position: sticky;
             top: 0;
             z-index: 2;

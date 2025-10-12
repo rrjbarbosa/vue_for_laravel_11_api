@@ -1,11 +1,11 @@
 <template>
   <div class="modal" :class="{ 'd-block': isOpen }" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-scrollable" role="document" :style="{ marginTop: '20px' }">
+    <div class="modal-dialog " role="document" :style="{ marginTop: '20px' }">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">{{ title }}</h5>
           <button type="button" class="close btn btn-outline-light" @click="close" aria-label="Close">
-            <span aria-hidden="true">&#10008;</span>
+            <span class="btnFechar"  aria-hidden="true">&#10008;</span>
           </button>
         </div>
         <!--Mensagem de erro--------------------------------------------------------------------------->
@@ -31,7 +31,7 @@
           </div>    
         </div>
         <!--Exibição de formulários----------------------------------------------------------------------->
-        <div v-else class="modal-body">                              
+        <div v-else class="modal-body" >                              
           <slot></slot>
         </div>
       </div>
@@ -105,8 +105,7 @@
 }
 
 .btn-outline-light{
-  padding: 1px 12px;
-  font-size: 28px;
+  padding: 0px 12px;
   font-weight: bold;
   border-color: #A3CDA8;
   color: #445a47;
@@ -115,6 +114,10 @@
 .btn-outline-light:hover {
   background-color: #445a47 !important; 
   color: #ffffff;
+}
+
+.btnFechar{
+  font-size: 20px;
 }
 
 /*--------------------------------[Msgs]--------------------------------*/
@@ -149,5 +152,7 @@
     padding-left: 10px;
     color: rgb(25, 146, 79);
 }
+
+
 
 </style>

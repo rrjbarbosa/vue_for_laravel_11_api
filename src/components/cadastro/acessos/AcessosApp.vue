@@ -173,7 +173,7 @@
     
     <!-- MODAL EDITAR PERMISSOES DO ACSSO =================================================================================== -->
     <ModalApp   :isOpen="modal.permissoesParaAcessoApp" @close="modalFechar('permissoesParaAcessoApp')"  
-                :largura="'60%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >  
+                :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >  
         <span class="tituloAcesso paddingZero" >{{linhaSelecionada.acesso}}</span>          
         <PermissoesParaAcessos :acessor_id="linhaSelecionada.id" ref="carregaPermissoes"/>
     </ModalApp>
@@ -257,8 +257,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 40px;
-        font-size: 30px;
+        height: 25px;
+        font-size: 20px;
         font-weight: bold;
         color: #275f2d;
     }

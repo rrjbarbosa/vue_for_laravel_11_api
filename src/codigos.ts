@@ -65,3 +65,20 @@ export function codLimparObjetoReativo(obj: any) {          // Exporta a funçã
     }
   }  
 }
+
+//------------------------------------------------------------------------------------------------------------------------
+export function codAlturaGridEmModal() {
+  const largura = window.innerWidth;
+  let altura = 0
+
+  if (largura <= 767) {                                                   //---Acesso por CELULAR
+    altura = (document.documentElement.scrollHeight / 100) * 45;
+  } else if (largura <= 991) {                                            //---Acesso por TABLET
+    altura = (document.documentElement.scrollHeight / 100) * 60;
+  } else {                                                                //----Acesso por DESKTOP
+    altura = (document.documentElement.scrollHeight / 100) * 70;
+  }
+
+  return altura + 'px';
+}
+
