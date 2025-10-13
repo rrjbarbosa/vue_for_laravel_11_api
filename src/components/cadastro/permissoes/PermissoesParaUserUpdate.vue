@@ -59,7 +59,6 @@
 
     onMounted(()=>{
         administrador.value = codUserLogado()['admin'] == 1 ? true : false
-        recarregaCss(props.dadosEdit.permissoes)
     })
 
     function pesquisar(){

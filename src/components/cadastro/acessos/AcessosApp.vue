@@ -4,6 +4,7 @@
     import { codHeaderToken, codUserLogado } from '@/codigos'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
+    import AcessosCreate from '@/components/cadastro/acessos/AcessosCreate.vue'
     import PermissoesParaAcessos from '@/components/cadastro/permissoes/PermissoesParaAcessos.vue'
     
 
@@ -133,12 +134,26 @@
         return false
     }
 
+    function novoAcesso(){
+        modalAbrir('acessoAppCriar')
+    }
+
+    function acessoGerado($event: tsProps['dadosEdit']['acessos']){
+        dados.push($event)
+        props.dadosEdit.acessos.push($event)
+        dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''));
+    }
+
     
 </script>
 <!--=================================================================================================================-->
 <template >
-    <div class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">
-        
+    <div class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">        
+        <button class="btnAzul" 
+            @click="novoAcesso()" 
+            :disabled="!administrador">
+            Novo Acesso
+        </button>
         <button class="btnAzul" 
             @click="pesquisar()" 
             :disabled="!administrador">
@@ -165,12 +180,17 @@
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
         <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativoSelect:i.id==linhaSelecionada.id}">
-                <div class=" div_td altDiv text-wrap" style="width: 100%;" @click="linhaFoco(i, index)">
-                    {{i.acesso }}
-                </div>
+            <div class=" div_td altDiv text-wrap" style="width: 100%;" @click="linhaFoco(i, index)">
+                {{i.acesso }}
+            </div>
         </div>
     </div>
-    
+
+    <!-- MODAL CRIAR ACESSO ================================================================================================= -->
+    <ModalApp   :isOpen="modal.acessoAppCriar" @close="modalFechar('acessoAppCriar')"  
+                :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >
+        <AcessosCreate @acessoCriado="acessoGerado($event)"/>
+    </ModalApp>
     <!-- MODAL EDITAR PERMISSOES DO ACSSO =================================================================================== -->
     <ModalApp   :isOpen="modal.permissoesParaAcessoApp" @close="modalFechar('permissoesParaAcessoApp')"  
                 :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >  

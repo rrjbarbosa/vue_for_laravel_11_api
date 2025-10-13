@@ -42,7 +42,7 @@ provide('chamarUserUpdateEdit', userUpdateRecarregarEdit)
 function userUpdateRecarregarEdit(){
     userUpdateRecarregar.value = 'sim'
     modalAbrir('userUpdateRecarregar');
-    edit()
+    edit()    
 }
 
 async function edit(){    
@@ -56,6 +56,8 @@ async function edit(){
         
         if(carregaEmpresas.value){ carregaEmpresas.value.recarregaCss(data.empresas)}
         userUpdateRecarregar.value == 'sim' ? userUpdateRecarregar.value = 'nao' : null
+        setTimeout(() => { carregaPermissoes();}, 100);                                 // setTimeout para recarregar a grid ao abrir userUpdate e atuaizar permissões em PermissoesParaAcessos 
+                
     }catch(error){
         Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
         modalAbrir('userUpdateMsgErro')
