@@ -140,9 +140,13 @@
 
     function acessoGerado($event: tsProps['dadosEdit']['acessos']){
         dados.push($event)
-        props.dadosEdit.acessos.push($event)
         dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''));
+        //modalFechar('acessoAppCriar')
     }
+
+    function fecharAcessosCreate(){
+        modalFechar('acessoAppCriar')
+    }    
 
     
 </script>
@@ -189,7 +193,7 @@
     <!-- MODAL CRIAR ACESSO ================================================================================================= -->
     <ModalApp   :isOpen="modal.acessoAppCriar" @close="modalFechar('acessoAppCriar')"  
                 :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >
-        <AcessosCreate @acessoCriado="acessoGerado($event)"/>
+        <AcessosCreate @acessoCriado="acessoGerado($event)" @fecharAcessosCreate="fecharAcessosCreate()" />
     </ModalApp>
     <!-- MODAL EDITAR PERMISSOES DO ACSSO =================================================================================== -->
     <ModalApp   :isOpen="modal.permissoesParaAcessoApp" @close="modalFechar('permissoesParaAcessoApp')"  

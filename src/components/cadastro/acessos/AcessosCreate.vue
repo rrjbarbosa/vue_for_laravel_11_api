@@ -5,12 +5,13 @@ import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
 import { ref } from 'vue';
 import { reactive } from 'vue';
 import { codHeaderToken, codUserLogado, codMsgInputsErros } from '@/codigos'
+import { inject } from 'vue';
 
 const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
 const mensagensModal = reactive<string[]>([]);
 const token = codHeaderToken()
 
-const emit = defineEmits(['acessoCriado'])
+const emit = defineEmits(['acessoCriado', 'fecharAcessosCreate'])
 
 interface Campos { 
     acesso: string | null    
@@ -21,6 +22,10 @@ const campos  = reactive<Campos>({
 })    
 
 const camposComErro = ref<string[]>([])
+
+//const acessosParaUserUpdateNovo = inject('acessosParaUserUpdateNovo')
+const acessosParaUserUpdateNovo = inject<(acesso: Campos) => void>('acessosParaUserUpdateNovo')
+
 
 function limpaCampos(){
     Object.assign(campos, {
@@ -44,8 +49,7 @@ async function salvar(){
             modalAbrir('AcessoCreateMsgOk')
             limpaCampos() 
             emit('acessoCriado',data.acesso)
-            modalFechar('AcessoCreateMsgErro')  
-
+            acessosParaUserUpdateNovo?.({...data.acesso, ativo:0})
         }catch(error:any){
             camposComErro.value =  []
             camposComErro.value = codMsgInputsErros(error.response.data.errors)
@@ -72,7 +76,11 @@ async function salvar(){
             modalAbrir('AcessoCreateMsgErro')
         }
         return qtdErros
-    }    
+    } 
+    
+    function fecharAcessosCreate(){
+        emit('fecharAcessosCreate')
+    }
 
 </script>
 <template>
@@ -92,6 +100,6 @@ async function salvar(){
     <ModalApp   :isOpen="modal.AcessoCreateMsgErro" @close="modalFechar('AcessoCreateMsgErro')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'obs'" title="" :mensagens="mensagensModal"/>
 
-    <ModalApp   :isOpen="modal.AcessoCreateMsgOk" @close="modalFechar('AcessoCreateMsgOk')" 
+    <ModalApp   :isOpen="modal.AcessoCreateMsgOk" @close="modalFechar('AcessoCreateMsgOk'), fecharAcessosCreate()" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'ok'" title="" :mensagens="mensagensModal"/>
 </template>

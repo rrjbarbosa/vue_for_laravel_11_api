@@ -6,6 +6,7 @@
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
     import AcessosApp from '@/components/cadastro/acessos/AcessosApp.vue'
+    import { provide } from 'vue'
 
     const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
     const mensagensModal = reactive<string[]>([]);
@@ -15,6 +16,8 @@
     });
 
     const emit = defineEmits(['atualizaPermissoes'])
+
+    provide('acessosParaUserUpdateNovo', setaNovoAcesso)
 
     interface tsCampos { 
         id:     string | null,
@@ -165,6 +168,12 @@
     function modelosDaAcessos(){
         carregaModeloAcesso.value.acessoAppLimparLinhaSelecionada()
         modalAbrir('modelosParaUserUpdateEditar')
+    }
+
+    function setaNovoAcesso(acesso:tsCampos){
+        dados.push(acesso)
+        dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''));
+        recarregaCss(dados)
     }
 </script>
 <!--=================================================================================================================-->
