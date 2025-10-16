@@ -203,7 +203,6 @@
     .centro{
         text-align: center;
     }
-    .erroInputBorda {border: 2px solid red;}
     .altDiv{
         height: 30px;
     }

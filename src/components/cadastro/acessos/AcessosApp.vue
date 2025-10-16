@@ -5,6 +5,7 @@
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
     import AcessosCreate from '@/components/cadastro/acessos/AcessosCreate.vue'
+    import AcessosUpdate from '@/components/cadastro/acessos/AcessosUpdate.vue'
     import PermissoesParaAcessos from '@/components/cadastro/permissoes/PermissoesParaAcessos.vue'
     
 
@@ -16,6 +17,8 @@
     });
 
     const emit = defineEmits(['atualizaPermissoes'])
+
+    const carregaUpdate = ref<any>(null)
 
     interface tsCampos { 
         id:     string | null,
@@ -138,10 +141,24 @@
         modalAbrir('acessoAppCriar')
     }
 
+    function editarAcesso(){
+        carregaUpdate.value.setaDadosParaUpdate(linhaSelecionada)
+        modalAbrir('acessoAppEditar')
+    }
+
     function acessoGerado($event: tsProps['dadosEdit']['acessos']){
         dados.push($event)
         dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''));
         //modalFechar('acessoAppCriar')
+    }
+
+    function acessoAtualizado($event: tsProps['dadosEdit']['acessos']){
+        console.log(JSON.stringify($event))
+        const dadosAtualizados = dados.acessos.find(obj => obj.id === $event.id)
+        dadosAtualizados.acesso = $event.acesso
+        
+         //Object.assign(dados, props.dadosEdit.acessos);
+
     }
 
     function fecharAcessosCreate(){
@@ -157,6 +174,11 @@
             @click="novoAcesso()" 
             :disabled="!administrador">
             Novo Acesso
+        </button>
+        <button class="btnVerde" 
+            @click="editarAcesso()" 
+            :disabled="!administrador">
+            Editar Acesso
         </button>
         <button class="btnAzul" 
             @click="pesquisar()" 
@@ -194,6 +216,11 @@
     <ModalApp   :isOpen="modal.acessoAppCriar" @close="modalFechar('acessoAppCriar')"  
                 :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >
         <AcessosCreate @acessoCriado="acessoGerado($event)" @fecharAcessosCreate="fecharAcessosCreate()" />
+    </ModalApp>
+    <!-- MODAL EDITAR ACESSO ================================================================================================= -->
+    <ModalApp   :isOpen="modal.acessoAppEditar" @close="modalFechar('acessoAppEditar')"  
+                :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >
+        <AcessosUpdate @acessoEditado="acessoAtualizado($event)" ref="carregaUpdate"/>
     </ModalApp>
     <!-- MODAL EDITAR PERMISSOES DO ACSSO =================================================================================== -->
     <ModalApp   :isOpen="modal.permissoesParaAcessoApp" @close="modalFechar('permissoesParaAcessoApp')"  
@@ -272,7 +299,6 @@
     .centro{
         text-align: center;
     }
-    .erroInputBorda {border: 2px solid red;}
     .altDiv{
         height: 30px;
     }

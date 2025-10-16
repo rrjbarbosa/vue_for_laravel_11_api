@@ -157,6 +157,9 @@
 .label{ text-align: left; font-weight: bold; padding-left: 5px;}
 .inputCss{ text-align: left; background-color: #ffffff; border: 1px solid #9fa3a7; border-radius: .25rem; padding-left: 5px; }
 .blocoVerde{background-color: #A3CDA8;}
+.erroInputBorda {
+  border: 2px solid red;
+}
 
 /*----MOUSE------------------------------------------------------------------------*/
 .linhaPadrao:hover{

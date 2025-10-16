@@ -370,12 +370,6 @@ function carregaPermissoes(){
   font-size: 20px;
   margin-left: 50%;
 }
-
-.erroInputBorda {
-  border: 2px solid red;
-}
-    padding-left: 15px;
-    paddi
 .msgErro{ng-bottom: 5px;
     font-weight: bold;
 }

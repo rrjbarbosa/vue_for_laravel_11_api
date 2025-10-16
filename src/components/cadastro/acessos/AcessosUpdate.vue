@@ -5,30 +5,37 @@ import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
 import { ref } from 'vue';
 import { reactive } from 'vue';
 import { codHeaderToken, codUserLogado, codMsgInputsErros } from '@/codigos'
-import { inject } from 'vue';
 
 const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
 const mensagensModal = reactive<string[]>([]);
 const token = codHeaderToken()
 
-const emit = defineEmits(['acessoCriado', 'fecharAcessosCreate'])
+const emit = defineEmits(['acessoEditado'])
 
-interface Campos { 
+defineExpose({
+    setaDadosParaUpdate
+});
+
+interface Campos {
+    id: string | null, 
     acesso: string | null    
 }
 
 const campos  = reactive<Campos>({
+    id:'',
     acesso:''
 })    
 
 const camposComErro = ref<string[]>([])
 
-//const acessosParaUserUpdateNovo = inject('acessosParaUserUpdateNovo')
-const acessosParaUserUpdateNovo = inject<(acesso: Campos) => void>('acessosParaUserUpdateNovo')
-
+function setaDadosParaUpdate(acesso: Campos){
+    limpaCampos();
+    Object.assign(campos, acesso);
+}
 
 function limpaCampos(){
     Object.assign(campos, {
+        id:'',
         acesso: ''
     });
 }
@@ -44,12 +51,11 @@ async function salvar(){
         }
 
         try{
-            const { data } = await axiosPlugin.post(`acesso-criar`, campos, token);
+            const { data } = await axiosPlugin.put(`acesso-editar`, campos, token);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
             modalAbrir('AcessoCreateMsgOk')
-            limpaCampos() 
-            emit('acessoCriado',data.acesso)
-            acessosParaUserUpdateNovo?.({...data.acesso, ativo:0})
+            emit('acessoEditado',campos)
+            console.log(data.status)
         }catch(error:any){
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('AcessoCreateMsgErro')
@@ -78,10 +84,6 @@ async function salvar(){
         return qtdErros
     } 
     
-    function fecharAcessosCreate(){
-        emit('fecharAcessosCreate')
-    }
-
 </script>
 <template>
     <div class="paddingDez">   
@@ -99,7 +101,7 @@ async function salvar(){
     <ModalApp   :isOpen="modal.AcessoCreateMsgErro" @close="modalFechar('AcessoCreateMsgErro')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'obs'" title="" :mensagens="mensagensModal"/>
 
-    <ModalApp   :isOpen="modal.AcessoCreateMsgOk" @close="modalFechar('AcessoCreateMsgOk'), fecharAcessosCreate()" 
+    <ModalApp   :isOpen="modal.AcessoCreateMsgOk" @close="modalFechar('AcessoCreateMsgOk')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'ok'" title="" :mensagens="mensagensModal"/>
 </template>
 <style scoped>
