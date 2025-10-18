@@ -53,10 +53,11 @@ async function salvar(){
         try{
             const { data } = await axiosPlugin.put(`acesso-editar`, campos, token);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
-            modalAbrir('AcessoCreateMsgOk')
             emit('acessoEditado',campos)
-            console.log(data.status)
+            modalAbrir('AcessoCreateMsgOk')   
+            
         }catch(error:any){
+            console.log(error)
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('AcessoCreateMsgErro')
             camposComErro.value =  []

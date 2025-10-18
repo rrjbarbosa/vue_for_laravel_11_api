@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import { reactive } from 'vue';
     import { ref, onMounted, nextTick } from 'vue';
-    import { codHeaderToken, codUserLogado } from '@/codigos'
+    import { codHeaderToken, codUserLogado, codAlturaGridEmModal } from '@/codigos'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
     import AcessosCreate from '@/components/cadastro/acessos/AcessosCreate.vue'
@@ -153,12 +153,8 @@
     }
 
     function acessoAtualizado($event: tsProps['dadosEdit']['acessos']){
-        console.log(JSON.stringify($event))
-        const dadosAtualizados = dados.acessos.find(obj => obj.id === $event.id)
-        dadosAtualizados.acesso = $event.acesso
-        
-         //Object.assign(dados, props.dadosEdit.acessos);
-
+        const item = dados.find(i => i.id === $event.id)    //find(...) percorre o array procurando um item que tenha o mesmo id do $event.id.
+        Object.assign(item, $event)                         //Atualiza o item encontrado, Mas de forma genérica e dinâmica — qualquer campo existente em $event substitui o valor em item.
     }
 
     function fecharAcessosCreate(){
@@ -205,9 +201,11 @@
             </div>
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
-        <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativoSelect:i.id==linhaSelecionada.id}">
-            <div class=" div_td altDiv text-wrap" style="width: 100%;" @click="linhaFoco(i, index)">
-                {{i.acesso }}
+        <div style="overflow-y: auto; margin-left: 3px;" :style="{ height: codAlturaGridEmModal()}">
+            <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativoSelect:i.id==linhaSelecionada.id}">
+                <div class=" div_td altDiv text-wrap" style="width: 100%;" @click="linhaFoco(i, index)">
+                    {{i.acesso }}
+                </div>
             </div>
         </div>
     </div>

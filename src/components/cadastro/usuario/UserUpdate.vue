@@ -225,7 +225,7 @@ function carregaPermissoes(){
 </script>
 
 <template >  
-    <div style="height: 10%; margin-left: 3px;">
+    <div style="height: 5%; margin-left: 3px;">
         <div class="navegacao paddingZero "> 
             <div style="text-align: left;">
                 <span class="pdZeroLargComp "><button @click="retornaGrid()" class="btn btn-sm btn-outline-success botao">Usuários</button></span>
@@ -233,7 +233,7 @@ function carregaPermissoes(){
             </div>
         </div>
     </div> 
-    <div style="height: 90%; margin-left: 3px;" ref="refAlturaDiv90">        
+    <div style="height: 95%; margin-left: 3px;" ref="refAlturaDiv90">        
         <div class="row ">
             <div class="col-md-4 paddingZero">
                 <div class="row paddingZero">
