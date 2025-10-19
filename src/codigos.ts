@@ -67,7 +67,7 @@ export function codLimparObjetoReativo(obj: any) {          // Exporta a funçã
 }
 
 //------------------------------------------------------------------------------------------------------------------------
-export function codAlturaGridEmModal() {
+export function codAlturaGridUmaColunaEmModal() {
   const largura = window.innerWidth;
   let altura = 0
 

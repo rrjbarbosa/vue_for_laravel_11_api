@@ -31,6 +31,7 @@ export type tsDadosEdit = {
     ativo: number
   },
   permissoes?:{
+    id: string,
     nome: string,
     nome_exibicao: string
   },

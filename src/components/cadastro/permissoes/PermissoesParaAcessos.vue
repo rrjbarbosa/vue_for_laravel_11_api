@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import { reactive } from 'vue';
     import { ref, onMounted, nextTick } from 'vue';
-    import { codHeaderToken, codUserLogado, codAlturaGridEmModal} from '@/codigos'
+    import { codHeaderToken, codUserLogado, codAlturaGridUmaColunaEmModal} from '@/codigos'
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
@@ -209,7 +209,7 @@
                 <input type="text" v-model="inputFiltro.nome_exibicao" class="inputBuscaTbl">
                 <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
             </div>
-            <div style="overflow-y: auto; margin-left: 3px;" :style="{ height: codAlturaGridEmModal()}">
+            <div style="overflow-y: auto; margin-left: 3px;" :style="{ height: codAlturaGridUmaColunaEmModal()}">
                 <div class=" div_tbody tamTbl "  v-for="(i, index) in dadosPesquisados" :key="index" @click="linhaFoco(i, index)" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
                     <div class=" div_td altDiv text-wrap" style="width: 100%;" >
                         <button v-if="i.ativo" class="btn btn-outline-success btnAtivado" >&#10004;</button>

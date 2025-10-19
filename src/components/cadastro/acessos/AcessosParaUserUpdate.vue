@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import { reactive } from 'vue';
     import { Ref, ref, onMounted, nextTick } from 'vue';
-    import { codHeaderToken, codUserLogado, codAlturaGridEmModal } from '@/codigos'
+    import { codHeaderToken, codUserLogado,  } from '@/codigos'
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
@@ -39,7 +39,7 @@
             acessos?:{
                 id:     string,
                 acesso: string,
-                ativo:  number
+                ativo?:  number|null
             }
             permissoes?:{
                 id:             string,
@@ -47,12 +47,15 @@
                 nome_exibicao:  string,
                 ativo:          number
             }
-        }
-        
+        },
+        alturaDiv90ParaComponente: number;
     }
 
     const props = defineProps<tsProps>();
-      
+
+    const botoes        = ref<string>("0");
+    const gridTabela    = ref<string>("0");
+    
     const inputFiltro = reactive<tsImputFiltros>({
         acesso:''
     });
@@ -75,7 +78,13 @@
     onMounted(()=>{
         administrador.value = codUserLogado()['admin'] == 1 ? true : false
         recarregaCss(props.dadosEdit.acessos)
+        setTimeout(()=>{calculaAltura()},100)
     })
+
+    function calculaAltura(){
+        botoes.value        = ((props.alturaDiv90ParaComponente /100)*4)+'px'
+        gridTabela.value    = ((props.alturaDiv90ParaComponente /100)*90)+'px'
+    }
 
     function pesquisar(){
         gridPesquisa()
@@ -178,7 +187,7 @@
 </script>
 <!--=================================================================================================================-->
 <template >
-    <div class=" paddingZero" style="margin-top:2px; margin-bottom: 2px;">
+    <div class=" paddingZero" :style="{height: botoes, marginTop:'2px', marginBottom: '2px' }">
         <button class="btnVerde" 
             @click="modalAbrir('acessosParaUserUpdateEditar')"
             :disabled="!administrador">
@@ -200,7 +209,7 @@
             Editar Acessos
         </button>     
     </div>
-    <div style="overflow-y: auto; margin-left: 3px;" >
+    <div :style="{overflowY:'auto', height:gridTabela, marginTop:'2px', marginBottom:'2px' }">
         <div class=" div_thead tamTbl">
             <div class=" div_th t100porCento">
                 Acessos <br> 
@@ -208,13 +217,11 @@
             </div>
             <input type="text" style="opacity: 0; position: absolute; left: -9999px;"> <!-- input de sacrifício para receber o email salgo do google, senão é preenchido automaticamente no input da pesquisa-->
         </div>
-        <div style="overflow-y: auto; margin-left: 3px;" :style="{ height: codAlturaGridEmModal()}">
-            <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
-                    <div class=" div_td t100porCento altDiv text-wrap" @click="linhaFoco(i, index)">
-                        <button v-if="i.ativo" class="btn btn-outline-success btnAtivado">&#10004;</button>
-                        <button v-else class="btn btn-outline-danger btnInativado">&#10008;</button>
-                        {{i.acesso }}
-                    </div>
+        <div class=" div_tbody tamTbl " v-for="(i, index) in dados" :key="index" :class="{ativo:i.css=='ativo', inativo:i.css=='inativo', ativoSelect:i.css=='ativoSelect', inativoSelect: i.css=='inativoSelect' }">
+            <div class=" div_td t100porCento altDiv text-wrap" @click="linhaFoco(i, index)">
+                <button v-if="i.ativo" class="btn btn-outline-success btnAtivado">&#10004;</button>
+                <button v-else class="btn btn-outline-danger btnInativado">&#10008;</button>
+                {{i.acesso }}
             </div>
         </div>
     </div>

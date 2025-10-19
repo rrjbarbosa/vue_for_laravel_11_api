@@ -20,6 +20,8 @@ const user                      = JSON.parse(sessionStorage.getItem('usuario_app
 const refAlturaDiv90            = ref<any>(null);
 const alturaDivUsuarioEmpresa   = ref<string>("0");
 const alturaDivSetor            = ref<string>("0");
+const alturaDiv90ParaComponente = ref<number>(0);
+const alturaDivParaEmpresa      = ref(0);
 const alturaDentroNoventa       = ref<string>("0");
 const token                     = codHeaderToken()
 const admin                     = 0
@@ -34,7 +36,9 @@ onMounted(() => {
     edit()
     alturaDentroNoventa.value       = (refAlturaDiv90.value?.offsetHeight-38)+'px' || '0px';
     alturaDivUsuarioEmpresa.value   = ((refAlturaDiv90.value?.offsetHeight /2)-10)+'px' || '0px';
+    alturaDivParaEmpresa.value      = ((refAlturaDiv90.value?.offsetHeight /2)-10)
     alturaDivSetor.value            =  (refAlturaDiv90.value?.offsetHeight - 40)+'px';
+    alturaDiv90ParaComponente.value =  (refAlturaDiv90.value?.offsetHeight);
 })
 
 provide('chamarUserUpdateEdit', userUpdateRecarregarEdit)
@@ -235,7 +239,7 @@ function carregaPermissoes(){
     </div> 
     <div style="height: 95%; margin-left: 3px;" ref="refAlturaDiv90">        
         <div class="row ">
-            <div class="col-md-4 paddingZero">
+            <div class="col-md-3 paddingZero">
                 <div class="row paddingZero">
                     <div class=" col-md-12  borda paddingZero" :style="{ height: alturaDivUsuarioEmpresa }"  style="margin-top:6px">
                         <div class="blocoVerdeEscuro">USUÁRIO</div>
@@ -255,16 +259,16 @@ function carregaPermissoes(){
                     <div class=" col-md-12 borda paddingZero" :style="{ height: alturaDivUsuarioEmpresa }" style="margin-top:8px; ">
                         <div class="blocoVerdeEscuro">EMPRESAS DO USUÁRIO</div> 
                         <div class="paddingTreis">
-                            <EmpresasParaUserUpdate :user_id="id" ref="carregaEmpresas"/>
+                            <EmpresasParaUserUpdate :user_id="id" :alturaDivParaEmpresa="alturaDivParaEmpresa" ref="carregaEmpresas"/>
                         </div>
                     </div>
                 </div>    
             </div>
-            <div class="col-md-2 paddingZero" style="margin-top:6px; padding-left: 3px;">
+            <div class="col-md-3 paddingZero" style="margin-top:6px; padding-left: 3px;">
                 <div class="paddingZero borda" >
                     <div class="paddingZero blocoVerdeEscuro">SETORES</div> 
                     <div class="paddingZero" :style="{ height: alturaDivSetor }">
-                        <SetoresParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit"/>
+                        <SetoresParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit" :alturaDiv90ParaComponente="alturaDiv90ParaComponente"/>
                     </div>
                 </div>   
             </div>
@@ -272,7 +276,7 @@ function carregaPermissoes(){
                 <div class="paddingZero borda" >
                     <div class="paddingZero blocoVerdeEscuro">PERMISSÕES</div> 
                     <div class="paddingZero" :style="{ height: alturaDivSetor }">
-                        <PermissoesParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit" ref="recarregaPermissoes" />
+                        <PermissoesParaUserUpdate v-if="Object.keys(dadosEdit).length" :permissoes="dadosEdit.permissoes" ref="recarregaPermissoes" :alturaDiv90ParaComponente="alturaDiv90ParaComponente"/>
                     </div>
                 </div>   
             </div>
@@ -280,7 +284,7 @@ function carregaPermissoes(){
                 <div class="paddingZero borda" >
                     <div class="paddingZero blocoVerdeEscuro">ACESSOS</div> 
                     <div class="paddingZero" :style="{ height: alturaDivSetor }">
-                        <AcessosParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit" @atualizaPermissoes="carregaPermissoes()"/>
+                        <AcessosParaUserUpdate v-if="Object.keys(dadosEdit).length" :dadosEdit="dadosEdit" :alturaDiv90ParaComponente="alturaDiv90ParaComponente" @atualizaPermissoes="carregaPermissoes()"/>
                     </div>
                 </div>   
             </div>
