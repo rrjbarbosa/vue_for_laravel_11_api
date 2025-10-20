@@ -45,7 +45,7 @@
                 id:             string,
                 nome:           string,
                 nome_exibicao:  string,
-                ativo:          number
+                ativo?:          number
             }
         },
         alturaDiv90ParaComponente: number;
@@ -184,6 +184,10 @@
         dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''));
         recarregaCss(dados)
     }
+
+    function acessoExcluido($event: number){
+        dados.splice($event, 1)
+    }
 </script>
 <!--=================================================================================================================-->
 <template >
@@ -251,7 +255,7 @@
     <!-- MODAL MODELOS DE ACESSO============================================================================================= -->
     <ModalApp   :isOpen="modal.modelosParaUserUpdateEditar" @close="modalFechar('modelosParaUserUpdateEditar')"  
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Modelos de Acessos" :mensagens="mensagensModal" >    
-        <AcessosApp :dadosEdit="dadosEdit" ref="carregaModeloAcesso"/>
+        <AcessosApp :dadosEdit="dadosEdit" ref="carregaModeloAcesso" @acessoExcluido="acessoExcluido($event)"/>
     </ModalApp>    
 
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->

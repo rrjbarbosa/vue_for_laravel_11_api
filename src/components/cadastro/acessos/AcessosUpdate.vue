@@ -50,7 +50,7 @@ async function salvar(){
             return
         }
 
-        try{
+        try{ 
             const { data } = await axiosPlugin.put(`acesso-editar`, campos, token);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
             emit('acessoEditado',campos)

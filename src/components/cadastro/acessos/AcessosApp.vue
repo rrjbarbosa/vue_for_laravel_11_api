@@ -7,6 +7,7 @@
     import AcessosCreate from '@/components/cadastro/acessos/AcessosCreate.vue'
     import AcessosUpdate from '@/components/cadastro/acessos/AcessosUpdate.vue'
     import PermissoesParaAcessos from '@/components/cadastro/permissoes/PermissoesParaAcessos.vue'
+import { axiosPlugin } from '@/plugins/axios';
     
 
     const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
@@ -16,7 +17,7 @@
         acessoAppLimparLinhaSelecionada
     });
 
-    const emit = defineEmits(['atualizaPermissoes'])
+    const emit = defineEmits(['acessoExcluido'])
 
     const carregaUpdate = ref<any>(null)
 
@@ -129,8 +130,8 @@
         carregaPermissoes.value.gridPermissoesParaAcesso(linhaSelecionada.id)
         modalAbrir('permissoesParaAcessoApp')
     }
-    
-    function btnEditarPermissaoAcesso(){
+
+    function btnHabilitar(){
         if(!linhaSelecionada.id || !administrador){
             return true
         }
@@ -138,6 +139,7 @@
     }
 
     function novoAcesso(){
+        acessoAppLimparLinhaSelecionada()
         modalAbrir('acessoAppCriar')
     }
 
@@ -159,9 +161,32 @@
 
     function fecharAcessosCreate(){
         modalFechar('acessoAppCriar')
+    }
+    function exluirConfirma(){
+        modalAbrir('acessoAppExcluir')
     }    
 
-    
+    async function excluir(){
+        carregando.value = true                                         //-Exibe Carregando e oculta btn até receber a resposta do servidor            
+        await axiosPlugin.delete(`acesso-excluir/${linhaSelecionada.id}`, token)
+        .then(({data}) =>{
+            carregando.value = false                                    //-Para o carregando
+            modalFechar('acessoAppExcluir')                             //-Fecha Modal de confirmação do excluir
+            dados.splice(linhaSelecionada.index, 1)                     //-Deleta acesso de AcessoApp(Grid Atual) 
+            emit('acessoExcluido',linhaSelecionada.index)               //-Deleta acesso em AcessosParaUpdate
+            acessoAppLimparLinhaSelecionada()                           //-Limpar Linha Selecionada
+            mensagensModal.splice(0, mensagensModal.length)             //-Reseta mensagens
+            Object.assign(mensagensModal, ['Excluído com Sucesso']);    //-Seta msg se sucesso para o modal msgOk
+            modalAbrir('acessoAppMsgOk')                                //-Exibe modal de sucesso da operação
+        })
+        .catch(error =>{
+            carregando.value = false
+            modalFechar('acessoAppExcluir')                             //-Fecha Modal de confirmação do excluir
+            mensagensModal.splice(0, mensagensModal.length)             //-Reseta mensagens
+            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+            modalAbrir('acessosAppMsgErro')
+        })   
+    }
 </script>
 <!--=================================================================================================================-->
 <template >
@@ -173,23 +198,28 @@
         </button>
         <button class="btnVerde" 
             @click="editarAcesso()" 
-            :disabled="!administrador">
+            :disabled="btnHabilitar()">
             Editar Acesso
         </button>
         <button class="btnAzul" 
             @click="pesquisar()" 
-            :disabled="!administrador">
+            :disabled="!inputFiltro.acesso">
             Pesquisar
         </button> 
         <button class="btnAmarelo" 
             @click="limparPesquisa()" 
-            :disabled="!administrador">
+            :disabled="!inputFiltro.acesso">
             Limpar
         </button>
-        <button class="btnVerde" 
+        <button class="btnCinza" 
             @click="editarPermissoesDoAcesso()" 
-            :disabled="btnEditarPermissaoAcesso()">
+            :disabled="btnHabilitar()">
             Editar permissões Acesso
+        </button>
+        <button class="btnVermelho" 
+            @click="exluirConfirma()" 
+            :disabled="btnHabilitar()">
+            Excluir Acesso
         </button>      
     </div>
     
@@ -220,6 +250,23 @@
                 :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >
         <AcessosUpdate @acessoEditado="acessoAtualizado($event)" ref="carregaUpdate"/>
     </ModalApp>
+    <!-- MODAL EXLUIR ACESSO ================================================================================================= -->
+    <ModalApp   :isOpen="modal.acessoAppExcluir" @close="modalFechar('acessoAppExcluir')"  
+                :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" :title="linhaSelecionada?.acesso" :mensagens="mensagensModal" >
+        <div class="divCentro">
+            <div v-if="carregando">
+                <div class="col-md-12 div_centro"><div class="carregando"></div></div>
+                <div class="col-md-12 div_centro">Aguarde</div>
+            </div>
+            <div v-else>
+                <button class="btnVermelho" 
+                    @click="excluir()" 
+                    :disabled="!administrador">
+                    Excluir Confirma?
+                </button>
+            </div>
+        </div>    
+    </ModalApp>
     <!-- MODAL EDITAR PERMISSOES DO ACSSO =================================================================================== -->
     <ModalApp   :isOpen="modal.permissoesParaAcessoApp" @close="modalFechar('permissoesParaAcessoApp')"  
                 :largura="'90%'" :alturaMax="'95%'" :padraoObsOk="'padrao'" title="" :mensagens="mensagensModal" >  
@@ -232,7 +279,6 @@
 
     <ModalApp   :isOpen="modal.acessoAppMsgOk" @close="modalFechar('acessoAppMsgOk')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'ok'" title="" :mensagens="mensagensModal"/>
-    
 </template>
 
 <!--=================================================================================================================-->
