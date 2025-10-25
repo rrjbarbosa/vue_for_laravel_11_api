@@ -23,7 +23,6 @@ const campos  = reactive<Campos>({
 
 const camposComErro = ref<string[]>([])
 
-//const acessosParaUserUpdateNovo = inject('acessosParaUserUpdateNovo')
 const acessosParaUserUpdateNovo = inject<(acesso: Campos) => void>('acessosParaUserUpdateNovo')
 
 

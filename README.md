@@ -81,6 +81,27 @@ $ sudo npm install axios --save                                                 
         app.provide('api', api)                                                   // Fornece a instância para injeção via composição API
         }
     }
+###===========================================================================================
+###=====================Recarregar visão de Dados após update/create =========================
+###==================================Provide / Inject=========================================
+*** no Avô ***
+    import { provide } from 'vue'
+
+    provide('acessosParaUserUpdateAtualiza', atualizaAcesso)
+
+    function atualizaAcesso(acesso:tsCampos){
+        const index = dados.findIndex(i => i.id === acesso.id)                  //-Encontra o index do item 
+        Object.assign(dados[index], acesso)                                     //-Atualiza os dados do objeto existente
+        dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''))    // Ordena o array pelo campo 'acesso'
+        recarregaCss(dados)                                                     // Recarrega o CSS (função já existente)                
+    }
+*** No Neto ***
+    import { inject } from 'vue';
+
+    const acessosParaUserUpdateAtualiza = inject<(acesso: Campos) => void>('acessosParaUserUpdateAtualiza')
+
+    acessosParaUserUpdateAtualiza?.(campos)     //-Atualiza o avô AcessosParaUserUpdate
+
 
 ###===========================================================================================
 ###===========================================================================================

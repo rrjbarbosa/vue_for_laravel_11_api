@@ -5,6 +5,7 @@ import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
 import { ref } from 'vue';
 import { reactive } from 'vue';
 import { codHeaderToken, codUserLogado, codMsgInputsErros } from '@/codigos'
+import { inject } from 'vue';
 
 const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
 const mensagensModal = reactive<string[]>([]);
@@ -27,6 +28,8 @@ const campos  = reactive<Campos>({
 })    
 
 const camposComErro = ref<string[]>([])
+
+const acessosParaUserUpdateAtualiza = inject<(acesso: Campos) => void>('acessosParaUserUpdateAtualiza')
 
 function setaDadosParaUpdate(acesso: Campos){
     limpaCampos();
@@ -53,7 +56,8 @@ async function salvar(){
         try{ 
             const { data } = await axiosPlugin.put(`acesso-editar`, campos, token);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
-            emit('acessoEditado',campos)
+            emit('acessoEditado',campos)                //-Atualiza Pai AcessosApp.vue
+            acessosParaUserUpdateAtualiza?.(campos)     //-Atualiza o avô AcessosParaUserUpdate
             modalAbrir('AcessoCreateMsgOk')   
             
         }catch(error:any){

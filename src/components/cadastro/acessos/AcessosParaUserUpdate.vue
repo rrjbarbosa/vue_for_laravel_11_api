@@ -18,6 +18,7 @@
     const emit = defineEmits(['atualizaPermissoes'])
 
     provide('acessosParaUserUpdateNovo', setaNovoAcesso)
+    provide('acessosParaUserUpdateAtualiza', atualizaAcesso)
 
     interface tsCampos { 
         id:     string | null,
@@ -183,6 +184,13 @@
         dados.push(acesso)
         dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''));
         recarregaCss(dados)
+    }
+
+    function atualizaAcesso(acesso:tsCampos){
+        const index = dados.findIndex(i => i.id === acesso.id)                  //-Encontra o index do item 
+        Object.assign(dados[index], acesso)                                     //-Atualiza os dados do objeto existente
+        dados.sort((a, b) => (a.acesso ?? '').localeCompare(b.acesso ?? ''))    // Ordena o array pelo campo 'acesso'
+        recarregaCss(dados)                                                     // Recarrega o CSS (função já existente)                
     }
 
     function acessoExcluido($event: number){
