@@ -66,13 +66,20 @@ function rota(nome: string){
             <button class="nav-link"        id="v-pills-settings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
           </div>
           <div class="tab-content" id="v-pills-tabContent">
-            <div class="tab-pane fade show active" id="v-pills-cadastro" role="tabpanel" aria-labelledby="v-pills-cadastro-tab">
-              <button type="button" 
-                @click="rota('user-grid')" 
-                :class="[administrador ? 'btn btn-outline-success btn-sm' : 'btn btn-outline-secondary btn-sm' ]"  
-                :disabled="!administrador">
-                Usuários
-              </button>
+            <div class="tab-pane fade show active " id="v-pills-cadastro" role="tabpanel" aria-labelledby="v-pills-cadastro-tab">
+                <button type="button" 
+                  @click="rota('user-grid')" 
+                  :class="[administrador ? 'btn btn-outline-success btn-sm' : 'btn btn-outline-secondary btn-sm' ]"  
+                  :disabled="!administrador">
+                  Usuários
+                </button>
+                <button type="button" 
+                  @click="rota('empresas')" 
+                  class="btnNavegacao"
+                  :class="[administrador ? 'btn btn-outline-success btn-sm' : 'btn btn-outline-secondary btn-sm' ]"  
+                  :disabled="!administrador">
+                  Empresas
+                </button>
             </div>
             <div class="tab-pane fade" id="v-pills-comercial" role="tabpanel" aria-labelledby="v-pills-comercial-tab">
               Comerc... Botões
@@ -126,15 +133,8 @@ html, body {
   background-color: #e6e7e6;
 }
 
-
-
-
-
-
-
-
-.total {
-  /*height: 100vh;*/
+.btnNavegacao{
+  margin-left: 10px;
 }
 
 .nav-link {
