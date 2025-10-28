@@ -5,6 +5,7 @@
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
+    import EmpresaUpdate from './EmpresaUpdate.vue';
 
     const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
     const mensagensModal = reactive<string[]>([]);
@@ -12,6 +13,8 @@
     defineExpose({
         recarregaCss
     });
+
+    const carregaUpdate = ref<any>(null)
 
     interface tsCampos { 
         id:             string | null,
@@ -170,9 +173,26 @@
         })   
     }
 
+    async function editar(){
+        try{ 
+            modalAbrir('empresaCarregando') 
+            const { data } = await axiosPlugin.get(`empresa-edit/${linhaSelecionada.id}`, token);
+                modalFechar('empresaCarregando')
+                carregaUpdate.value.setaDadosParaUpdate(linhaSelecionada)    
+                modalAbrir('empresaEditar')       
+        }catch(error:any){
+            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+            modalAbrir('empresasMsgErro')
+        } 
+    }
+
     //********************************************************************************
     //************************************[BTNS]***************************************
     //*********************************************************************************
+    function btnEditarDisabled(){
+        let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.id != '' ? false : true
+        return trueFalse
+    }
     function btnDesabilitarDisabled(){
         let trueFalse = codUserLogado()['admin'] == 1 && linhaSelecionada.ativo == 1 ? false : true
         return trueFalse
@@ -200,6 +220,11 @@
                     <button  class="btn btn-sm btn-outline-dark botao" >Usuários Lista</button>
                 </div>
                 <div class=" paddingZero" style="margin-top:2px;">
+                    <button class="btnVerde" 
+                        @click="editar()" 
+                        :disabled="btnEditarDisabled()">
+                        Editar
+                    </button>
                     <button class="btnVermelho" 
                         v-if="btnDesabilitarExibir()" 
                         @click="modalAbrir('empresasHabilitaDesabilita')" 
@@ -269,6 +294,19 @@
             </div>
         </div>
 
+    
+    <!-- MODAL AGUARDE ===================================================================================================== -->
+    <ModalApp   :isOpen="modal.empresaCarregando" @close="modalFechar('empresaCarregando')"  
+                :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
+        <div class="col-md-12 div_centro"><div class="carregando"></div></div>
+        <div class="col-md-12 div_centro">Aguarde</div>
+    </ModalApp>
+    <!-- MODAL EDITAR EMPRESA ============================================================================================== -->
+    <ModalApp   :isOpen="modal.empresaEditar" @close="modalFechar('empresaEditar')"  
+                :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
+        <EmpresaUpdate ref="carregaUpdate"/>
+    </ModalApp>
+    
     <!-- MODAL HABILITA DESABILITA USER ===================================================================================== -->
     <ModalApp   :isOpen="modal.empresasHabilitaDesabilita" @close="modalFechar('empresasHabilitaDesabilita')"  
                 :largura="'80%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" :title="linhaSelecionada.nome_fantasia ?? ''" :mensagens="mensagensModal" >    
@@ -291,7 +329,7 @@
             </div>      
         </div>
         
-    </ModalApp>    
+    </ModalApp>
 
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
     <ModalApp   :isOpen="modal.empresasMsgErro" @close="modalFechar('empresasMsgErro')" 
