@@ -178,7 +178,7 @@
             modalAbrir('empresaCarregando') 
             const { data } = await axiosPlugin.get(`empresa-edit/${linhaSelecionada.id}`, token);
                 modalFechar('empresaCarregando')
-                carregaUpdate.value.setaDadosParaUpdate(linhaSelecionada)    
+                carregaUpdate.value.setaDadosParaUpdate(data.empresa)    
                 modalAbrir('empresaEditar')       
         }catch(error:any){
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
