@@ -10,6 +10,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'                               // importa a função `ref` da API reativa do Vue
 
+
+const emit = defineEmits(['imagemAnexada'])
+
 const imagemBase64 = ref<string | null>(null)           // cria uma ref reativa chamada `imagemBase64` que pode ser string ou null; inicialmente null
 
 function imagemSelcionada(event: Event) {                   // Função chamada quando o usuário seleciona um arquivo, declara a função `imagemSelcionada` que recebe um Event (ex.: change do input file)
@@ -19,9 +22,24 @@ function imagemSelcionada(event: Event) {                   // Função chamada 
 
   const reader = new FileReader()                       // cria um novo FileReader — API do browser para ler arquivos locais
   reader.onload = e => {                                // atribui um callback que será chamado quando a leitura terminar com sucesso
-    imagemBase64.value = e.target?.result as string     // dentro do callback: define o valor da ref com o resultado da leitura (data URL / base64)
+    const base64Result = e.target?.result as string
+    imagemBase64.value = base64Result                   // dentro do callback: define o valor da ref com o resultado da leitura (data URL / base64)  
+    emit('imagemAnexada',{imgParaUpload:file, 
+                          imgBase64:imagemBase64.value, 
+                          imgNome:gerarNomeImg()
+                        })                              //-Envia imagem para componente Pai
   }
   reader.readAsDataURL(file)                            // inicia a leitura do arquivo como Data URL (gera uma string base64 com o tipo MIME)
+
+  
+}
+
+function gerarNomeImg() {
+  return 'xxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
 }
 </script>
 

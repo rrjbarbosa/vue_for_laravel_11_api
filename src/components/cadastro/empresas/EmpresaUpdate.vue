@@ -115,7 +115,11 @@ function limpaMsgDigitarInput(campo: String){
             modalAbrir('AcessoCreateMsgErro')
         }
         return qtdErros
-    } 
+    }
+        
+    function setaImagem($event){
+        console.log($event)
+    }
     
 </script>
 <template>
@@ -245,7 +249,8 @@ function limpaMsgDigitarInput(campo: String){
     <!-- MODAL EDITAR IMAGEM ============================================================================================== -->
     <ModalApp   :isOpen="modal.empresaImagem" @close="modalFechar('empresaImagem')"  
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
-        <ImagemBuscar/>
+        <button @click="salvarImagem()"   class="btn btn-sm btn-success botao" title="Salvar" >Salvar Imagem</button>
+        <ImagemBuscar @imagemAnexada="setaImagem($event)" />
     </ModalApp>
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
     <ModalApp   :isOpen="modal.AcessoCreateMsgErro" @close="modalFechar('AcessoCreateMsgErro')" 
