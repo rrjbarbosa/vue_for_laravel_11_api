@@ -1,79 +1,87 @@
 <script setup lang="ts">
-import { axiosPlugin } from '@/plugins/axios';
-import ModalApp from '@/components/diversos/modal/ModalApp.vue';
-import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
-import { ref } from 'vue';
-import { reactive } from 'vue';
-import { codHeaderToken, codUserLogado, codMsgInputsErros } from '@/codigos'
-import { inject } from 'vue';
-import type {tsCamposEdicao} from './tsEmpresa.types.ts'
-import ImagemBuscar from '@/components/diversos/imagens/imagemBuscar.vue';
+    import { axiosPlugin } from '@/plugins/axios';
+    import ModalApp from '@/components/diversos/modal/ModalApp.vue';
+    import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
+    import { ref } from 'vue';
+    import { reactive } from 'vue';
+    import { codHeaderTokenImgComImpus, codUserLogado, codMsgInputsErros } from '@/codigos'
+    import { inject } from 'vue';
+    import type {tsCamposEdicao} from './tsEmpresa.types.ts'
+    import ImagemBuscar from '@/components/diversos/imagens/imagemBuscar.vue';
 
-const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
-const mensagensModal = reactive<string[]>([]);
-const token = codHeaderToken()
+    const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
+    const mensagensModal = reactive<string[]>([]);
+    const tokenParaImgComInputs = codHeaderTokenImgComImpus()
 
-const emit = defineEmits(['EmpresaEditada'])
+    const emit = defineEmits(['EmpresaEditada'])
 
-defineExpose({
-    setaDadosParaUpdate
-});
-
-const campos  = reactive<tsCamposEdicao>({
-    anexo_logomarca: '',
-    nome_fantasia: '',
-    razao_social: '',
-    cnpj: null,
-    insc_estadual: null,
-    insc_municipal: null,
-    rua: null,
-    numero: null,
-    bairro: '',
-    cidade: '',
-    cep: null,
-    uf: '',
-    site: '',
-    email: '',
-    tel_um: null,
-    tel_dois: null,
-    tel_tres: null,
-    historico_edicao: undefined
-})    
-
-const camposComErro = ref<string[]>([])
-
-
-function setaDadosParaUpdate(dados: tsCamposEdicao){
-    limpaCampos();
-    Object.assign(campos, dados);
-}
-
-function limpaCampos(){
-    Object.assign(campos, {
-        anexo_logomarca:    '',
-        nome_fantasia:      '',
-        razao_social:       '',
-        cnpj:               null,
-        insc_estadual:      null,
-        insc_municipal:     null,
-        rua:                null,
-        numero:             null,
-        bairro:             '',
-        cidade:             '',
-        cep:                null,
-        uf:                 '',
-        site:               '',
-        email:              '',
-        tel_um:             null,
-        tel_dois:           null,
-        tel_tres:           null,
-        historico_edicao:   undefined
+    defineExpose({
+        setaDadosParaUpdate
     });
-}
 
-function limpaMsgDigitarInput(campo: String){
-    camposComErro.value = camposComErro.value.filter(item => item !== campo);
-}    
+    const campos  = reactive<tsCamposEdicao>({
+        id:'',
+        imgParaUpload:   '',
+        imgBase64:       '',
+        imgNome:         '',
+        nome_fantasia: '',
+        razao_social: '',
+        cnpj: null,
+        insc_estadual: null,
+        insc_municipal: null,
+        rua: null,
+        numero: null,
+        bairro: '',
+        cidade: '',
+        cep: null,
+        uf: '',
+        site: '',
+        email: '',
+        tel_um: null,
+        tel_dois: null,
+        tel_tres: null,
+        historico_edicao: undefined
+    })    
+
+    const camposComErro = ref<string[]>([])
+
+    function setaDadosParaUpdate(dados: tsCamposEdicao){
+        limpaCampos();
+        Object.assign(campos, dados);
+    }
+
+    function limpaCampos(){
+        Object.assign(campos, {
+            id:                 '',
+            imgParaUpload:      '',
+            imgBase64:          '',
+            imgNome:            '',
+            nome_fantasia:      '',
+            razao_social:       '',
+            cnpj:               null,
+            insc_estadual:      null,
+            insc_municipal:     null,
+            rua:                null,
+            numero:             null,
+            bairro:             '',
+            cidade:             '',
+            cep:                null,
+            uf:                 '',
+            site:               '',
+            email:              '',
+            tel_um:             null,
+            tel_dois:           null,
+            tel_tres:           null,
+            historico_edicao:   undefined
+        });
+    }
+
+
+
+    function limpaMsgDigitarInput(campo: String){
+        camposComErro.value = camposComErro.value.filter(item => item !== campo);
+    }    
+        
     async function salvar(){
         let erros = validarCampos()
         if(erros>0){
@@ -81,15 +89,14 @@ function limpaMsgDigitarInput(campo: String){
         }
 
         try{ 
-            const { data } = await axiosPlugin.put(`acesso-editar`, campos, token);
+            const { data } = await axiosPlugin.post(`empresa-update`, campos, tokenParaImgComInputs);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
             emit('EmpresaEditada',campos)                //-Atualiza Pai AcessosApp.vue
-            modalAbrir('AcessoCreateMsgOk')   
+            modalAbrir('EmpresaUpdateMsgOk')   
             
         }catch(error:any){
-            console.log(error)
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
-            modalAbrir('AcessoCreateMsgErro')
+            modalAbrir('EmpresaUpdateMsgErro')
             camposComErro.value =  []
             camposComErro.value = codMsgInputsErros(error.response.data.errors)
         } 
@@ -112,13 +119,20 @@ function limpaMsgDigitarInput(campo: String){
             camposComErro.value =  []
             camposComErro.value = codMsgInputsErros(CamposObrigatorios)                                                          //-Exibe os erros na Modal
             Object.assign(mensagensModal, modalMsgErro(CamposObrigatorios));
-            modalAbrir('AcessoCreateMsgErro')
+            modalAbrir('EmpresaUpdateMsgErro')
         }
         return qtdErros
     }
         
     function setaImagem($event){
-        console.log($event)
+        let dados = {...campos, 
+            imgParaUpload:$event.imgParaUpload, 
+            imgBase64:$event.imgBase64,
+            imgNome:$event.imgNome,}
+
+        Object.assign(campos, dados)    
+        modalFechar('empresaImagem')
+        console.log(campos)
     }
     
 </script>
@@ -127,11 +141,19 @@ function limpaMsgDigitarInput(campo: String){
         <div class="paddingZero div_centro">
             <button @click="salvar()"   class="btn btn-sm btn-success botao" title="Salvar" >Salvar</button>
         </div>
-        <div class="row">
-            <div class="col-md-2" @click="modalAbrir('empresaImagem')">
-                <div style=" border: 2px solid #333; height: 185px; width: 250px;/* largura | estilo | cor */">
-
-                </div>
+        <div class="row paddingZero">
+            <div class="col-md-2 paddingZero" @click="modalAbrir('empresaImagem')"> 
+                <img 
+                    v-if="campos.imgBase64"
+                    :src="campos.imgBase64"
+                    class="paddingZero"
+                    style="border: 2px solid #333; height: 185px; width: 250px;"
+                />
+                <img 
+                    v-else
+                    src="@/assets/faltaImagem.png"
+                    style="border: 2px solid #333; height: 185px; width: 250px;"
+                />                
             </div>
             <div class="col-md-10">
                 <div class="row">
@@ -242,21 +264,22 @@ function limpaMsgDigitarInput(campo: String){
                 <input type="text" v-model="campos.tel_tres" @input="limpaMsgDigitarInput('tel_tres')"  
                     class="form-control inputCss" 
                     :class="{ erroInputBorda: camposComErro.includes('tel_tres') }">                                
-            </div>        
+            </div>     {{ JSON.stringify(campos) }}   
         </div>      
     </div>
 
     <!-- MODAL EDITAR IMAGEM ============================================================================================== -->
     <ModalApp   :isOpen="modal.empresaImagem" @close="modalFechar('empresaImagem')"  
-                :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
-        <button @click="salvarImagem()"   class="btn btn-sm btn-success botao" title="Salvar" >Salvar Imagem</button>
-        <ImagemBuscar @imagemAnexada="setaImagem($event)" />
+                :largura="'90%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
+        <div class="divCentro">
+        </div>
+        <ImagemBuscar :altura="'180px'" :largura="'240px'" @imagemAnexada="setaImagem($event)" />
     </ModalApp>
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
-    <ModalApp   :isOpen="modal.AcessoCreateMsgErro" @close="modalFechar('AcessoCreateMsgErro')" 
+    <ModalApp   :isOpen="modal.EmpresaUpdateMsgErro" @close="modalFechar('EmpresaUpdateMsgErro')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'obs'" title="" :mensagens="mensagensModal"/>
 
-    <ModalApp   :isOpen="modal.AcessoCreateMsgOk" @close="modalFechar('AcessoCreateMsgOk')" 
+    <ModalApp   :isOpen="modal.EmpresaUpdateMsgOk" @close="modalFechar('EmpresaUpdateMsgOk')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'ok'" title="" :mensagens="mensagensModal"/>
 </template>
 <style scoped>

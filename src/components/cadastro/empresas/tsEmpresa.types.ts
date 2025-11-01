@@ -1,5 +1,8 @@
 export type tsCamposEdicao = {
-  anexo_logomarca:  string|null;
+  id:               string|null;
+  imgParaUpload:    string|null;
+  imgBase64:        string|null;
+  imgNome:          string|null;
   nome_fantasia:    string|null;
   razao_social:     string|null;
   cnpj:             number|null;

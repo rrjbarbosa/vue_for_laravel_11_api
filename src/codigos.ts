@@ -32,6 +32,16 @@ export function codHeaderToken() {
   };
 }
 //------------------------------------------------------------------------------------------------------------------------
+export function codHeaderTokenImgComImpus() {
+  const user = codUserLogado();
+  return {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      Authorization: 'Bearer ' + user.token
+    }
+  };
+}
+//------------------------------------------------------------------------------------------------------------------------
 export function codMsgErrors(objetoArray: Object){                                //- objetoArray é um Objeto onde cada chave é um array 
   let mensagensErro = objetoArray.msgsAuthorize ? objetoArray.msgsAuthorize : []  //- Seta msg do authorize se existir, ou seta array vazio para msg do rules 
   for(let errors of Object.keys(objetoArray)){
