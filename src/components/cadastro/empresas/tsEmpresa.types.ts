@@ -5,7 +5,8 @@ export type tsCamposEdicao = {
   imgNome:          string|null;
   nome_fantasia:    string|null;
   razao_social:     string|null;
-  cnpj:             number|null;
+  cnpjOuCpf:        string|null;
+  cnpjCpf:          number|null;
   insc_estadual:    number|null;
   insc_municipal:   number|null;
   rua:              string|null;

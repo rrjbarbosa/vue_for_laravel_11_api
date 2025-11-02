@@ -102,6 +102,78 @@ $ sudo npm install axios --save                                                 
 
     acessosParaUserUpdateAtualiza?.(campos)     //-Atualiza o avô AcessosParaUserUpdate
 
+###===========================================================================================
+###=============================Uso de Mascaras com ( maska ) ================================
+###===========================================================================================
+    https://beholdr.github.io/maska/v3/#/vue?ref=madewithvuejs.com
+    
+    npm install maska                                                 //-Instalação  
+
+    import { vMaska } from "maska/vue"                                //-Importar maska localmente na aplicação  
+
+    const cnpjSemMascara = ref('')                                    //-valor sem formatação Obrigatório antes do defineExpose
+    const cnpjComMascara = ref('')                                    //-valor com formatação Obrigatório antes do defineExpose
+
+    defineExpose({
+            cnpjSemMascara                                            //-Expor a variável que armazena os dados sem formatação  
+    });
+
+    <input type="text" v-model="cnpjComMascara" 
+        class="form-control inputCss"  
+        v-maska:cnpjSemMascara.unmasked="'##.###.###/####-##'"        //-configurar formato da Mascara     
+    >   
+
+    {{cnpjSemMascara}}                                                //-Se desejar visualizar o valor sem formatação no html  
+    
+    //----------------------------------------------------------------------------------------
+    Máscara dinâmica com mais de uma formatação
+   
+    // Importa a diretiva de máscara do pacote maska/vue
+        import { vMaska } from "maska/vue"      
+
+
+    // Variável reativa que guarda o valor SEM MÁSCARA (apenas números)
+    // O maska permite capturar o valor "unmasked" para enviar ao backend, por exemplo
+    // Ex: se digitar "123.456.789-00", aqui ficará "12345678900"
+        
+        const cnpjCpfSemMascara = ref('')
+
+    // Expõe a variável para o componente pai, caso precise acessá-la de fora
+    // (por exemplo, em um <script setup> pai que usa ref do componente filho)
+        
+        defineExpose({
+            cnpjCpfSemMascara
+        })
+
+    // Computed que define a MÁSCARA dinamicamente de acordo com o tipo escolhido
+    // Se o campo `campos.cnpjOuCpf` for 'cnpj', aplica a máscara de CNPJ
+    // Caso contrário, aplica a máscara de CPF
+
+        const formataCpfCnpj = computed(() => {
+            return campos.cnpjOuCpf === 'cnpj'
+                ? '##.###.###/####-##'                      // Máscara de CNPJ (14 dígitos)
+                : '###.###.###-##'                          // Máscara de CPF  (11 dígitos)
+        })
+
+    <div class="label">CNPJ ou CPF</div>  
+    <select v-model="campos.cnpjOuCpf" class="form-control inputCss">
+        <option value="cpf">CPF</option>
+        <option value="cnpj">CNPJ</option>
+    </select>
+
+
+
+    v-maska É a diretiva do pacote maska/vue. Ela aplica máscaras de entrada em tempo real no <input>.
+    v-maskaunmasked feature do maska permite capturar apenas números
+
+    cnpjCpfSemMascara.unmasked 
+    <div class="label">CNPJ / CPF</div>  
+    <input type="text" 
+        v-model="campos.cnpjCpf"                              //-valor mascarado (com pontos e traços) 
+        class="form-control inputCss"  
+        v-maska:cnpjCpfSemMascara.unmasked="formataCpfCnpj" 
+        :class="{ erroInputBorda: camposComErro.includes('cnpjCpf') }">         
+
 
 ###===========================================================================================
 ###===========================================================================================

@@ -20,7 +20,7 @@ export type tsDadosEdit = {
   empresas?:{
     id: string,
     nome_fantasia: string,
-    cnpj: number,
+    cnpjCpf: number,
     cidade: string,
     bairro: string,
     ativo: number

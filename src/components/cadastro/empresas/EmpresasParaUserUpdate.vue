@@ -16,7 +16,7 @@
     interface tsCampos { 
         id:             string | null,
         nome_fantasia:  string | null,
-        cnpj:           string | null,
+        cnpjCpf:        string | null,
         cidade:         string | null,
         bairro:         string | null,
         ativo:          number | null,
@@ -26,7 +26,7 @@
 
     interface tsImputFiltros { 
         nome_fantasia:  string | null,
-        cnpj:           string | null,
+        cnpjCpf:        string | null,
         cidade:         string | null,
         bairro:         string | null,        
     }
@@ -43,7 +43,7 @@
        
     const inputFiltro = reactive<tsImputFiltros>({
         nome_fantasia:'', 
-        cnpj:'', 
+        cnpjCpf:'', 
         cidade:'', 
         bairro:''
     });
@@ -73,7 +73,7 @@
     function limparPesquisa(){
         Object.assign(inputFiltro, {
             nome_fantasia:'', 
-            cnpj:'', 
+            cnpjCpf:'', 
             cidade:'', 
             bairro:''
         });
@@ -84,7 +84,7 @@
     const linhaSelecionada = reactive<tsCampos>({
         id:'',
         nome_fantasia: '', 
-        cnpj: '', 
+        cnpjCpf: '', 
         cidade:'', 
         bairro:'',
         ativo:2,
@@ -233,8 +233,8 @@
                     <input type="text" v-model="inputFiltro.nome_fantasia" class="inputBuscaTbl">
                 </div>
                 <div class=" div_th t200">
-                    Cnpj <br>
-                    <input type="text" v-model="inputFiltro.cnpj" class="inputBuscaTbl">
+                    Cnpj ou Cpf <br>
+                    <input type="text" v-model="inputFiltro.cnpjCpf" class="inputBuscaTbl">
                 </div>
                 <div class=" div_th t200">
                     Cidade  <br> 
@@ -251,7 +251,7 @@
                         {{i.nome_fantasia }}
                     </div>
                     <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">
-                        {{i.cnpj}}
+                        {{i.cnpjCpf}}
                     </div>
                     <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">
                         {{i.cidade}}

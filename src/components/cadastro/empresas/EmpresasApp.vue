@@ -20,7 +20,8 @@
         id:             string | null,
         nome_fantasia:  string | null,
         razao_social:   string | null,
-        cnpj:           string | null,
+        cnpjOuCpf:       string | null,
+        cnpjCpf:        string | null,
         cidade:         string | null,
         bairro:         string | null,
         ativo:          number | null,
@@ -31,7 +32,8 @@
     interface tsImputFiltros { 
         nome_fantasia:  undefined,
         razao_social:   undefined,
-        cnpj:           undefined,
+        cnpjOuCpf:      undefined,
+        cnpjCpf:        undefined,
         cidade:         undefined,
         bairro:         undefined,        
     }  
@@ -39,7 +41,8 @@
     const inputFiltro = reactive<tsImputFiltros>({
         nome_fantasia: undefined, 
         razao_social:undefined,
-        cnpj:undefined, 
+        cnpjOuCpf:undefined,
+        cnpjCpf:undefined, 
         cidade:undefined,
         bairro:undefined,
     });
@@ -67,7 +70,8 @@
         Object.assign(inputFiltro, {
             nome_fantasia:'',
             razao_social:'', 
-            cnpj:'', 
+            cnpjOuCpf:'', 
+            cnpjCpf:'', 
             cidade:'', 
             bairro:''
         });
@@ -79,7 +83,8 @@
         id:'',
         nome_fantasia: '', 
         razao_social:'',
-        cnpj: '', 
+        cnpjOuCpf: '', 
+        cnpjCpf: '', 
         cidade:'', 
         bairro:'',
         ativo:2,
@@ -109,7 +114,8 @@
             id:'',
             nome_fantasia: '-', 
             razao_social:'',
-            cnpj: '', 
+            cnpjOuCpf: '', 
+            cnpjCpf: '', 
             cidade:'', 
             bairro:'',
             ativo:2,
@@ -184,6 +190,11 @@
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('empresasMsgErro')
         } 
+    }
+
+    function EmpresaAtualizada($event: tsCampos){
+        const item = dadosPesquisados.find(i => i.id === $event.id)    //find(...) percorre o array procurando um item que tenha o mesmo id do $event.id.
+        Object.assign(item, $event)                         //Atualiza o item encontrado, Mas de forma genérica e dinâmica — qualquer campo existente em $event substitui o valor em item.
     }
 
     //********************************************************************************
@@ -261,9 +272,13 @@
                     Razão Social <br> 
                     <input type="text" v-model="inputFiltro.razao_social" class="inputBuscaTbl">
                 </div>
+                <div class=" div_th t100">
+                    Tipo Doc <br>
+                    <input type="text" v-model="inputFiltro.cnpjOuCpf" class="inputBuscaTbl">
+                </div>
                 <div class=" div_th t200">
-                    Cnpj <br>
-                    <input type="text" v-model="inputFiltro.cnpj" class="inputBuscaTbl">
+                    Cnpj / Cpf <br>
+                    <input type="text" v-model="inputFiltro.cnpjCpf" class="inputBuscaTbl">
                 </div>
                 <div class=" div_th t300">
                     Cidade  <br> 
@@ -282,8 +297,11 @@
                 <div class=" div_td t500 text-wrap" @click="linhaFoco(i, index)">
                     {{i.razao_social }}
                 </div>
+                <div class=" div_td t100 text-wrap" @click="linhaFoco(i, index)">
+                    {{i.cnpjOuCpf}}
+                </div>
                 <div class=" div_td t200 text-wrap" @click="linhaFoco(i, index)">
-                    {{i.cnpj}}
+                    {{i.cnpjCpf}}
                 </div>
                 <div class=" div_td t300 text-wrap" @click="linhaFoco(i, index)">
                     {{i.cidade}}
@@ -304,7 +322,7 @@
     <!-- MODAL EDITAR EMPRESA ============================================================================================== -->
     <ModalApp   :isOpen="modal.empresaEditar" @close="modalFechar('empresaEditar')"  
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
-        <EmpresaUpdate ref="carregaUpdate"/>
+        <EmpresaUpdate ref="carregaUpdate" @EmpresaEditada="(EmpresaAtualizada($event))"/>
     </ModalApp>
     
     <!-- MODAL HABILITA DESABILITA USER ===================================================================================== -->
@@ -352,7 +370,7 @@
     }
 
     .tamTbl{
-        min-width: 1550px;
+        min-width: 1650px;
     }
     .aguarde{
         background-color: rgb(243, 146, 20);

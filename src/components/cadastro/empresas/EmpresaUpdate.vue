@@ -2,22 +2,30 @@
     import { axiosPlugin } from '@/plugins/axios';
     import ModalApp from '@/components/diversos/modal/ModalApp.vue';
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
-    import { ref } from 'vue';
+    import { computed, ref } from 'vue';
     import { reactive } from 'vue';
     import { codHeaderTokenImgComImpus, codUserLogado, codMsgInputsErros } from '@/codigos'
     import { inject } from 'vue';
     import type {tsCamposEdicao} from './tsEmpresa.types.ts'
     import ImagemBuscar from '@/components/diversos/imagens/imagemBuscar.vue';
-
+    import { vMaska } from "maska/vue"
+        
     const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
-    const mensagensModal = reactive<string[]>([]);
+    const mensagensModal        = reactive<string[]>([]);
     const tokenParaImgComInputs = codHeaderTokenImgComImpus()
-
-    const emit = defineEmits(['EmpresaEditada'])
+    const cnpjCpfSemMascara     = ref('')                                                           //-Obrigatório antes do defineExpose
+    const emit                  = defineEmits(['EmpresaEditada'])
 
     defineExpose({
-        setaDadosParaUpdate
+        setaDadosParaUpdate, 
+        cnpjCpfSemMascara
     });
+
+    const formataCpfCnpj = computed(() => {
+        return campos.cnpjOuCpf === 'cnpj' 
+            ? '##.###.###/####-##' 
+            : '###.###.###-##'
+    })
 
     const campos  = reactive<tsCamposEdicao>({
         id:'',
@@ -26,7 +34,8 @@
         imgNome:         '',
         nome_fantasia: '',
         razao_social: '',
-        cnpj: null,
+        cnpjOuCpf:      '',
+        cnpjCpf: null,
         insc_estadual: null,
         insc_municipal: null,
         rua: null,
@@ -44,6 +53,7 @@
     })    
 
     const camposComErro = ref<string[]>([])
+    const refLimparImg  = ref<any>(null);
 
     function setaDadosParaUpdate(dados: tsCamposEdicao){
         limpaCampos();
@@ -58,7 +68,8 @@
             imgNome:            '',
             nome_fantasia:      '',
             razao_social:       '',
-            cnpj:               null,
+            cnpjOuCpf:          null,
+            cnpjCpf:            null,
             insc_estadual:      null,
             insc_municipal:     null,
             rua:                null,
@@ -76,8 +87,6 @@
         });
     }
 
-
-
     function limpaMsgDigitarInput(campo: String){
         camposComErro.value = camposComErro.value.filter(item => item !== campo);
     }    
@@ -89,9 +98,10 @@
         }
 
         try{ 
-            const { data } = await axiosPlugin.post(`empresa-update`, campos, tokenParaImgComInputs);
+            let dados = {...campos, cnpjCpf: cnpjCpfSemMascara.value}
+            const { data } = await axiosPlugin.post(`empresa-update`, dados, tokenParaImgComInputs);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
-            emit('EmpresaEditada',campos)                //-Atualiza Pai AcessosApp.vue
+            emit('EmpresaEditada',dados)                //-Atualiza Pai AcessosApp.vue
             modalAbrir('EmpresaUpdateMsgOk')   
             
         }catch(error:any){
@@ -106,7 +116,7 @@
         const CamposObrigatorios = {
             nome_fantasia:  ['Falta nome Fantasia'],
             razao_social:   ['Falta Razão Social'],
-            cnpj:           ['Falta Cnpj']        
+            cnpjCpf:        ['Falta CNPJ / CPF']        
         }        
         Object.keys(CamposObrigatorios).forEach((key) => {                      // Percorre todas as chaves (keys) do objeto CamposObrigatorios
             const campo = key as keyof typeof campos                            // Faz um *type assertion* dizendo ao TypeScript que a chave é garantidamente uma das chaves de campos
@@ -132,8 +142,12 @@
 
         Object.assign(campos, dados)    
         modalFechar('empresaImagem')
-        console.log(campos)
     }
+
+    function limparImagemNoComponente(){
+        refLimparImg.value.limparIng()
+    }
+      
     
 </script>
 <template>
@@ -142,7 +156,7 @@
             <button @click="salvar()"   class="btn btn-sm btn-success botao" title="Salvar" >Salvar</button>
         </div>
         <div class="row paddingZero">
-            <div class="col-md-2 paddingZero" @click="modalAbrir('empresaImagem')"> 
+            <div class="col-md-2 paddingZero" @click="modalAbrir('empresaImagem'), limparImagemNoComponente()"> 
                 <img 
                     v-if="campos.imgBase64"
                     :src="campos.imgBase64"
@@ -158,7 +172,7 @@
             <div class="col-md-10">
                 <div class="row">
                     <div class="col-md-5">                   
-                        <div class="label">NOME</div>                                    
+                        <div class="label">NOME FANTASIA</div>                                    
                         <input type="text" v-model="campos.nome_fantasia" @input="limpaMsgDigitarInput('nome_fantasia')"  
                             class="form-control inputCss" 
                             :class="{ erroInputBorda: camposComErro.includes('nome_fantasia') }">                                
@@ -171,19 +185,27 @@
                     </div>        
                 </div>
                 <div class="row">
-                    <div class="col-md-4">                   
-                        <div class="label">CNPJ</div>                                    
-                        <input type="text" v-model="campos.cnpj" @input="limpaMsgDigitarInput('cnpj')"  
-                            class="form-control inputCss" 
-                            :class="{ erroInputBorda: camposComErro.includes('cnpj') }">                                
+                    <div class="col-md-3">                   
+                        <div class="label">CNPJ ou CPF</div>  
+                        <select v-model="campos.cnpjOuCpf" class="form-control inputCss">
+                            <option value="cpf">CPF</option>
+                            <option value="cnpj">CNPJ</option>
+                        </select>                                  
                     </div>
-                    <div class="col-md-4">                   
+                    <div class="col-md-3">                   
+                        <div class="label">CNPJ / CPF</div>  
+                        <input type="text" v-model="campos.cnpjCpf" @input="limpaMsgDigitarInput('cnpjCpf')"  
+                            class="form-control inputCss"  
+                            v-maska:cnpjCpfSemMascara.unmasked="formataCpfCnpj"
+                            :class="{ erroInputBorda: camposComErro.includes('cnpjCpf') }">                         
+                    </div>
+                    <div class="col-md-3">                   
                         <div class="label">INSCRIÇÃO ESTADUAL </div>                                    
                         <input type="text" v-model="campos.insc_estadual" @input="limpaMsgDigitarInput('insc_estadual')"  
                             class="form-control inputCss" 
                             :class="{ erroInputBorda: camposComErro.includes('insc_estadual') }">                                
                     </div>
-                    <div class="col-md-4">                   
+                    <div class="col-md-3">                   
                         <div class="label">INSCRIÇÃO MUNICIPAL</div>                                    
                         <input type="text" v-model="campos.insc_municipal" @input="limpaMsgDigitarInput('insc_municipal')"  
                             class="form-control inputCss" 
@@ -264,7 +286,7 @@
                 <input type="text" v-model="campos.tel_tres" @input="limpaMsgDigitarInput('tel_tres')"  
                     class="form-control inputCss" 
                     :class="{ erroInputBorda: camposComErro.includes('tel_tres') }">                                
-            </div>     {{ JSON.stringify(campos) }}   
+            </div> 
         </div>      
     </div>
 
@@ -273,7 +295,7 @@
                 :largura="'90%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
         <div class="divCentro">
         </div>
-        <ImagemBuscar :altura="'180px'" :largura="'240px'" @imagemAnexada="setaImagem($event)" />
+        <ImagemBuscar :altura="'180px'" :largura="'240px'" ref="refLimparImg" @imagemAnexada="setaImagem($event)" />
     </ModalApp>
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
     <ModalApp   :isOpen="modal.EmpresaUpdateMsgErro" @close="modalFechar('EmpresaUpdateMsgErro')" 

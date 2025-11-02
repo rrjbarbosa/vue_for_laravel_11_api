@@ -9,5 +9,4 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 const app = createApp(App)
 
 app.use(router)
-
 app.mount('#app')

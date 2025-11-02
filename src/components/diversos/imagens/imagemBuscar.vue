@@ -21,6 +21,10 @@ const props = defineProps<tsProps>();
 
 const emit = defineEmits(['imagemAnexada'])
 
+defineExpose({
+  limparIng
+});
+
 const imagemBase64 = ref<string | null>(null)           // cria uma ref reativa chamada `imagemBase64` que pode ser string ou null; inicialmente null
 
 function imagemSelcionada(event: Event) {               // Função chamada quando o usuário seleciona um arquivo, declara a função `imagemSelcionada` que recebe um Event (ex.: change do input file)
@@ -40,6 +44,10 @@ function imagemSelcionada(event: Event) {               // Função chamada quan
   reader.readAsDataURL(file)                            // inicia a leitura do arquivo como Data URL (gera uma string base64 com o tipo MIME)
 
   
+}
+
+function limparIng(){
+  imagemBase64.value = ''
 }
 
 function gerarNomeImg() {
