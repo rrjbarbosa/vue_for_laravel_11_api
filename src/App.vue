@@ -57,7 +57,7 @@ function rota(nome: string){
       <RouterView />
 
       <ModalApp   :isOpen="modal.app" @close="modalFechar('app')"  
-              :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Edição de Usuário" :mensagens="mensagensModal" >
+              :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="Menu" :mensagens="mensagensModal" >
         <div class="d-flex align-items-start" style="padding: 5px;">
           <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
             <button class="nav-link active" id="v-pills-cadastro-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cadastro" type="button" role="tab" aria-controls="v-pills-cadastro" aria-selected="true">Cadastro</button>
@@ -79,6 +79,13 @@ function rota(nome: string){
                   :class="[administrador ? 'btn btn-outline-success btn-sm' : 'btn btn-outline-secondary btn-sm' ]"  
                   :disabled="!administrador">
                   Empresas
+                </button>
+                <button type="button" 
+                  @click="rota('setores')" 
+                  class="btnNavegacao"
+                  :class="[administrador ? 'btn btn-outline-success btn-sm' : 'btn btn-outline-secondary btn-sm' ]"  
+                  :disabled="!administrador">
+                  Setores
                 </button>
             </div>
             <div class="tab-pane fade" id="v-pills-comercial" role="tabpanel" aria-labelledby="v-pills-comercial-tab">

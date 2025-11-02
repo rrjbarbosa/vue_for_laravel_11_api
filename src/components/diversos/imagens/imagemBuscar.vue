@@ -50,12 +50,13 @@ function limparIng(){
   imagemBase64.value = ''
 }
 
-function gerarNomeImg() {
-  return 'xxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
+function gerarNomeImg(tamanho = 44) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let resultado = '';
+    for (let i = 0; i < tamanho; i++) {
+        resultado += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return resultado;
 }
 </script>
 

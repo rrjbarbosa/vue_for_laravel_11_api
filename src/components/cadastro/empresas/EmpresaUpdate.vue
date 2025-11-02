@@ -16,9 +16,18 @@
     const cnpjCpfSemMascara     = ref('')                                                           //-Obrigatório antes do defineExpose
     const emit                  = defineEmits(['EmpresaEditada'])
 
+    const cepSemMascara = ref('')                                    //-valor sem formatação Obrigatório antes do defineExpose
+    const telUmSemMascara = ref('')                                    //-valor sem formatação Obrigatório antes do defineExpose
+    const telDoisSemMascara = ref('')                                    //-valor sem formatação Obrigatório antes do defineExpose
+    const telTresSemMascara = ref('')                                    //-valor sem formatação Obrigatório antes do defineExpose
+
     defineExpose({
         setaDadosParaUpdate, 
-        cnpjCpfSemMascara
+        cnpjCpfSemMascara,
+        cepSemMascara,
+        telUmSemMascara,
+        telDoisSemMascara,
+        telTresSemMascara
     });
 
     const formataCpfCnpj = computed(() => {
@@ -26,7 +35,7 @@
             ? '##.###.###/####-##' 
             : '###.###.###-##'
     })
-
+    
     const campos  = reactive<tsCamposEdicao>({
         id:'',
         imgParaUpload:   '',
@@ -98,7 +107,12 @@
         }
 
         try{ 
-            let dados = {...campos, cnpjCpf: cnpjCpfSemMascara.value}
+            let dados = {   ...campos, 
+                            cnpjCpf:  cnpjCpfSemMascara.value,
+                            tel_um:   telUmSemMascara.value,
+                            tel_dois: telDoisSemMascara.value,
+                            tel_tres: telTresSemMascara.value                                          
+                        }
             const { data } = await axiosPlugin.post(`empresa-update`, dados, tokenParaImgComInputs);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
             emit('EmpresaEditada',dados)                //-Atualiza Pai AcessosApp.vue
@@ -147,8 +161,6 @@
     function limparImagemNoComponente(){
         refLimparImg.value.limparIng()
     }
-      
-    
 </script>
 <template>
     <div class="paddingDez">   
@@ -241,13 +253,15 @@
                     </div>
                     <div class="col-md-1">                   
                         <div class="label">UF</div>                                    
-                        <input type="text" v-model="campos.uf" @input="limpaMsgDigitarInput('uf')"  
+                        <input type="text" v-model="campos.uf" @input=" limpaMsgDigitarInput('uf')"  
+                            v-maska="{ mask: 'AA', tokens: { A: { pattern: /[A-Za-z]/, transform: v => v.toUpperCase() } } }"
                             class="form-control inputCss" 
                             :class="{ erroInputBorda: camposComErro.includes('uf') }">                                
                     </div>
                     <div class="col-md-2">                   
                         <div class="label">CEP</div>                                    
                         <input type="text" v-model="campos.cep" @input="limpaMsgDigitarInput('cep')"  
+                            v-maska:cepSemMascara.unmasked="'##.###-###'"
                             class="form-control inputCss" 
                             :class="{ erroInputBorda: camposComErro.includes('cep') }">                                
                     </div>        
@@ -270,24 +284,33 @@
         </div>
         <div class="row">
             <div class="col-md-4">                   
-                <div class="label">TELEFONE 1</div>                                    
+                <div class="label">TELEFONE 1</div>                 
                 <input type="text" v-model="campos.tel_um" @input="limpaMsgDigitarInput('tel_um')"  
+                    v-maska:telUmSemMascara.unmasked="'(##) #########'"
                     class="form-control inputCss" 
                     :class="{ erroInputBorda: camposComErro.includes('tel_um') }">                                
             </div>
             <div class="col-md-4">                   
                 <div class="label">TELEFONE 2</div>                                    
-                <input type="text" v-model="campos.tel_um" @input="limpaMsgDigitarInput('tel_um')"  
+                <input type="text" v-model="campos.tel_dois" @input="limpaMsgDigitarInput('tel_dois')"  
+                    v-maska:telDoisSemMascara.unmasked="'(##) #########'"
                     class="form-control inputCss" 
-                    :class="{ erroInputBorda: camposComErro.includes('tel_um')}">                                
+                    :class="{ erroInputBorda: camposComErro.includes('tel_dois')}">                                
             </div>
             <div class="col-md-4">                   
                 <div class="label">TELEFONE 3</div>                                    
                 <input type="text" v-model="campos.tel_tres" @input="limpaMsgDigitarInput('tel_tres')"  
+                    v-maska:telTresSemMascara.unmasked="'(##) #########'" 
                     class="form-control inputCss" 
-                    :class="{ erroInputBorda: camposComErro.includes('tel_tres') }">                                
+                    :class="{ erroInputBorda: camposComErro.includes('tel_tres') }">                         
             </div> 
-        </div>      
+        </div>   
+         <div class="row ">
+            <div class="col-md-12 divCentro" style="background-color: #A3CDA8; margin-top: 5px;">
+                HITÓRICO DE EDIÇÃO
+            </div>
+            
+         </div>   
     </div>
 
     <!-- MODAL EDITAR IMAGEM ============================================================================================== -->
