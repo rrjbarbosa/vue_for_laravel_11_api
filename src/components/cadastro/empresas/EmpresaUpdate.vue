@@ -286,21 +286,22 @@
             <div class="col-md-4">                   
                 <div class="label">TELEFONE 1</div>                 
                 <input type="text" v-model="campos.tel_um" @input="limpaMsgDigitarInput('tel_um')"  
-                    v-maska:telUmSemMascara.unmasked="'(##) #########'"
+                    v-maska:telUmSemMascara.unmasked="{ mask: ['(##) ####-####', '(##) #####-####'] }"
                     class="form-control inputCss" 
                     :class="{ erroInputBorda: camposComErro.includes('tel_um') }">                                
             </div>
             <div class="col-md-4">                   
                 <div class="label">TELEFONE 2</div>                                    
                 <input type="text" v-model="campos.tel_dois" @input="limpaMsgDigitarInput('tel_dois')"  
-                    v-maska:telDoisSemMascara.unmasked="'(##) #########'"
+                    v-maska:telDoisSemMascara.unmasked="{ mask: ['(##) ####-####', '(##) #####-####'] }"
                     class="form-control inputCss" 
                     :class="{ erroInputBorda: camposComErro.includes('tel_dois')}">                                
             </div>
             <div class="col-md-4">                   
                 <div class="label">TELEFONE 3</div>                                    
                 <input type="text" v-model="campos.tel_tres" @input="limpaMsgDigitarInput('tel_tres')"  
-                    v-maska:telTresSemMascara.unmasked="'(##) #########'" 
+                    v-maska:telTresSemMascara.unmasked="{ mask: ['(##) ####-####', '(##) #####-####'] }"
+                    
                     class="form-control inputCss" 
                     :class="{ erroInputBorda: camposComErro.includes('tel_tres') }">                         
             </div> 
