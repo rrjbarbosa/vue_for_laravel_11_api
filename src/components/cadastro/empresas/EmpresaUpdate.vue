@@ -35,6 +35,22 @@
             ? '##.###.###/####-##' 
             : '###.###.###-##'
     })
+
+    // computed seguro para o histórico — evita usar JSON.parse diretamente no template
+    const historicoArray = computed(() => {
+        const raw = campos.historico_edicao;
+        if (!raw) return [];
+        try{
+            // se já for array, retorna como está
+            if (Array.isArray(raw)) return raw;
+            // tenta parsear se for string
+            if (typeof raw === 'string') return JSON.parse(raw) || [];
+            return [];
+        }catch(e){
+            // se houver erro de parse, retorna array vazio
+            return [];
+        }
+    })
     
     const campos  = reactive<tsCamposEdicao>({
         id:'',
@@ -96,7 +112,7 @@
         });
     }
 
-    function limpaMsgDigitarInput(campo: String){
+    function limpaMsgDigitarInput(campo: string){
         camposComErro.value = camposComErro.value.filter(item => item !== campo);
     }    
         
@@ -127,13 +143,13 @@
     }
 
     function validarCampos() {
-        const CamposObrigatorios = {
+        const CamposObrigatorios: Partial<Record<keyof tsCamposEdicao, string[]>> = {
             nome_fantasia:  ['Falta nome Fantasia'],
             razao_social:   ['Falta Razão Social'],
             cnpjCpf:        ['Falta CNPJ / CPF']        
         }        
         Object.keys(CamposObrigatorios).forEach((key) => {                      // Percorre todas as chaves (keys) do objeto CamposObrigatorios
-            const campo = key as keyof typeof campos                            // Faz um *type assertion* dizendo ao TypeScript que a chave é garantidamente uma das chaves de campos
+            const campo = key as keyof tsCamposEdicao                           // Faz um *type assertion* dizendo ao TypeScript que a chave é garantidamente uma das chaves de tsCamposEdicao
             if (campos[campo]) {                                                //-Verifica se o campo está preenchido
                 delete CamposObrigatorios[campo]                                //-Retira o erro se o campo estivar preenchido
             }
@@ -148,7 +164,7 @@
         return qtdErros
     }
         
-    function setaImagem($event){
+    function setaImagem($event: { imgParaUpload: any; imgBase64: any; imgNome: any; }){
         let dados = {...campos, 
             imgParaUpload:$event.imgParaUpload, 
             imgBase64:$event.imgBase64,
@@ -310,7 +326,48 @@
             <div class="col-md-12 divCentro" style="background-color: #A3CDA8; margin-top: 5px;">
                 HITÓRICO DE EDIÇÃO
             </div>
-            
+            <div style="height: 300px; overflow-y: auto; margin-left: 3px;" >
+                <div class=" div_thead tamTbl">
+                    <div class=" div_th t300">
+                        Nome Fantasia <br> 
+                    </div>
+                    <div class=" div_th t500">
+                        Razão Social <br> 
+                    </div>
+                    <div class=" div_th t100">
+                        Tipo Doc <br>
+                    </div>
+                    <div class=" div_th t200">
+                        Cnpj / Cpf <br>
+                    </div>
+                    <div class=" div_th t300">
+                        Cidade  <br> 
+                    </div>
+                    <div class=" div_th t250">
+                        Bairro  <br> 
+                    </div>
+                </div>
+                <div class=" div_tbody tamTbl " v-for="(i, index) in historicoArray" :key="index">
+                    <div class=" div_td t300 text-wrap" >
+                        {{i.nome_fantasia  }}
+                    </div>
+                    <div class=" div_td t500 text-wrap" >
+                        {{i.razao_social }}
+                    </div>
+                    <div class=" div_td t100 text-wrap" >
+                        {{i.cnpjOuCpf }}
+                    </div>
+                    <div class=" div_td t200 text-wrap" >
+                        {{i.cnpjCpf }}
+                    </div>
+                    <div class=" div_td t300 text-wrap" >
+                        {{i.cidade }}
+                    </div>
+                    <div class=" div_td t250 text-wrap" >
+                        {{i.bairro }}
+                    </div>
+                </div>
+            </div>
          </div>   
     </div>
 
@@ -330,4 +387,7 @@
 </template>
 <style scoped>
     @import '@/assets/main.css'; 
+    .tamTbl{
+        min-width: 1650px;
+    }
 </style>
