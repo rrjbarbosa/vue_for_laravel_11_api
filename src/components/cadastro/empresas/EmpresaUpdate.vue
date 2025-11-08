@@ -4,13 +4,12 @@
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
     import { computed, ref } from 'vue';
     import { reactive } from 'vue';
-    import { codHeaderTokenImgComImpus, codUserLogado, codMsgInputsErros } from '@/codigos'
-    import { inject } from 'vue';
+    import { codHeaderTokenImgComImpus, codUserLogado, codMsgInputsErros, codDataHora, codCnpjCpf, codCelularFixo, codCep } from '@/codigos'
     import type {tsCamposEdicao} from './tsEmpresa.types.ts'
     import ImagemBuscar from '@/components/diversos/imagens/imagemBuscar.vue';
     import { vMaska } from "maska/vue"
         
-    const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
+    const { modal, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
     const mensagensModal        = reactive<string[]>([]);
     const tokenParaImgComInputs = codHeaderTokenImgComImpus()
     const cnpjCpfSemMascara     = ref('')                                                           //-Obrigatório antes do defineExpose
@@ -36,20 +35,9 @@
             : '###.###.###-##'
     })
 
-    // computed seguro para o histórico — evita usar JSON.parse diretamente no template
-    const historicoArray = computed(() => {
-        const raw = campos.historico_edicao;
-        if (!raw) return [];
-        try{
-            // se já for array, retorna como está
-            if (Array.isArray(raw)) return raw;
-            // tenta parsear se for string
-            if (typeof raw === 'string') return JSON.parse(raw) || [];
-            return [];
-        }catch(e){
-            // se houver erro de parse, retorna array vazio
-            return [];
-        }
+    const historicoArray = computed(() => {                                     // computed seguro para o histórico — evita usar JSON.parse diretamente no template
+        if (!campos.historico_edicao) return [];
+        return JSON.parse(campos.historico_edicao) 
     })
     
     const campos  = reactive<tsCamposEdicao>({
@@ -127,7 +115,8 @@
                             cnpjCpf:  cnpjCpfSemMascara.value,
                             tel_um:   telUmSemMascara.value,
                             tel_dois: telDoisSemMascara.value,
-                            tel_tres: telTresSemMascara.value                                          
+                            tel_tres: telTresSemMascara.value,
+                            cep:      cepSemMascara.value                                          
                         }
             const { data } = await axiosPlugin.post(`empresa-update`, dados, tokenParaImgComInputs);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);
@@ -275,7 +264,7 @@
                             :class="{ erroInputBorda: camposComErro.includes('uf') }">                                
                     </div>
                     <div class="col-md-2">                   
-                        <div class="label">CEP</div>                                    
+                        <div class="label">CEP</div>                                 
                         <input type="text" v-model="campos.cep" @input="limpaMsgDigitarInput('cep')"  
                             v-maska:cepSemMascara.unmasked="'##.###-###'"
                             class="form-control inputCss" 
@@ -323,10 +312,10 @@
             </div> 
         </div>   
          <div class="row ">
-            <div class="col-md-12 divCentro" style="background-color: #A3CDA8; margin-top: 5px;">
+            <div class="col-md-12 divCentro tituloHistorico">
                 HITÓRICO DE EDIÇÃO
             </div>
-            <div style="height: 300px; overflow-y: auto; margin-left: 3px;" >
+            <div style="height: 300px; overflow-y: auto; padding:0" >
                 <div class=" div_thead tamTbl">
                     <div class=" div_th t300">
                         Nome Fantasia <br> 
@@ -340,11 +329,50 @@
                     <div class=" div_th t200">
                         Cnpj / Cpf <br>
                     </div>
+                    <div class=" div_th t150">
+                        Insc.Estadual <br>
+                    </div>
+                    <div class=" div_th t150">
+                        Insc.Municipal <br>
+                    </div>
+                    <div class=" div_th t600">
+                        Rua <br>
+                    </div>
+                    <div class=" div_th t100">
+                        Número <br>
+                    </div>
+                    <div class=" div_th t300">
+                        Bairro <br>
+                    </div>
                     <div class=" div_th t300">
                         Cidade  <br> 
                     </div>
-                    <div class=" div_th t250">
-                        Bairro  <br> 
+                    <div class=" div_th t100">
+                        Cep  <br> 
+                    </div>
+                    <div class=" div_th t50">
+                        UF <br>
+                    </div>
+                    <div class=" div_th t400">
+                        Site <br>
+                    </div>
+                    <div class=" div_th t400">
+                        E-Mail <br>
+                    </div>
+                    <div class=" div_th t150">
+                        Tel.Um <br>
+                    </div>
+                    <div class=" div_th t150">
+                        Tel.Dois <br>
+                    </div>
+                    <div class=" div_th t150">
+                        Tel.Tres <br>
+                    </div>
+                    <div class=" div_th t200">
+                        Data Hora <br>
+                    </div>
+                    <div class=" div_th t200">
+                        Editado Por <br>
                     </div>
                 </div>
                 <div class=" div_tbody tamTbl " v-for="(i, index) in historicoArray" :key="index">
@@ -355,16 +383,55 @@
                         {{i.razao_social }}
                     </div>
                     <div class=" div_td t100 text-wrap" >
-                        {{i.cnpjOuCpf }}
+                        {{ i.cnpjOuCpf }}
                     </div>
                     <div class=" div_td t200 text-wrap" >
-                        {{i.cnpjCpf }}
+                        {{codCnpjCpf(i.cnpjCpf) }}
+                    </div>
+                    <div class=" div_td t150 text-wrap" >
+                        {{i.insc_estadual }}
+                    </div>
+                    <div class=" div_td t150 text-wrap" >
+                        {{i.insc_municipal }}
+                    </div>
+                    <div class=" div_td t600 text-wrap" >
+                        {{i.rua }}
+                    </div>
+                    <div class=" div_td t100 text-wrap" >
+                        {{i.numero }}
+                    </div>
+                    <div class=" div_td t300 text-wrap" >
+                        {{i.bairro }}
                     </div>
                     <div class=" div_td t300 text-wrap" >
                         {{i.cidade }}
                     </div>
-                    <div class=" div_td t250 text-wrap" >
-                        {{i.bairro }}
+                    <div class=" div_td t100 text-wrap" >
+                        {{codCep(i.cep) }}
+                    </div>
+                    <div class=" div_td t50 text-wrap" >
+                        {{i.uf }}
+                    </div>
+                    <div class=" div_td t400 text-wrap" >
+                        {{i.site }}
+                    </div>
+                    <div class=" div_td t400 text-wrap" >
+                        {{i.email }}
+                    </div>
+                    <div class=" div_td t150 text-wrap" >
+                        {{codCelularFixo(i.tel_um) }}
+                    </div>
+                    <div class=" div_td t150 text-wrap" >
+                        {{codCelularFixo(i.tel_dois) }}
+                    </div>
+                    <div class=" div_td t150 text-wrap" >
+                        {{codCelularFixo(i.tel_tres) }}
+                    </div>
+                    <div class=" div_td t200 text-wrap" >
+                        {{  codDataHora(i.data_hora) }}
+                    </div>
+                    <div class=" div_td t200 text-wrap" >
+                        {{i.usuario }}
                     </div>
                 </div>
             </div>
@@ -388,6 +455,11 @@
 <style scoped>
     @import '@/assets/main.css'; 
     .tamTbl{
-        min-width: 1650px;
+        min-width: 4500px;
+    }
+    .tituloHistorico{
+        background-color: #406344; 
+        color: #ffffff; 
+        margin-top: 5px;
     }
 </style>
