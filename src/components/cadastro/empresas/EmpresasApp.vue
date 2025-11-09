@@ -137,12 +137,19 @@
     }
 
     async function carregaDados(){
+        carregando.value = true;
+        modalAbrir('empresaCarregando')
+
         try {
             const { data } = await axiosPlugin.get('empresas', token);
-            Object.assign(dados, data.dados);
-            recarregaCss(data.dados);             
+            carregando.value = false;
+            modalFechar('empresaCarregando')
+            Object.assign(dados, data?.dados ?? []);
+            recarregaCss(data?.dados ?? []);             
             delete data.dados;
         } catch (error:any) {
+            carregando.value = false;
+            modalFechar('empresaCarregando')
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('userGridMsgErro')
         }
@@ -175,6 +182,7 @@
         .catch(error =>{
             carregando.value = false
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+            modalFechar('empresasHabilitaDesabilita')
             modalAbrir('empresasMsgErro')
         })   
     }

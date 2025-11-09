@@ -5,8 +5,9 @@
     import { axiosPlugin } from '@/plugins/axios'
     import ModalApp from '@/components/diversos/modal/ModalApp.vue'
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod'
+    import SetorUpdate from './SetorUpdate.vue';
     
-    const { modal, modaMsg, modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
+    const { modal,  modalAbrir, modalFechar, modalMsgErro } = modalAppCod();
     const mensagensModal = reactive<string[]>([]);
 
     defineExpose({
@@ -112,9 +113,10 @@
         try {
             const { data } = await axiosPlugin.get('setores', token); 
             carregando.value = false;
-            Object.assign(dados, data?.dados ?? []);
-            recarregaCss(data?.dados ?? []);
             modalFechar('setoresCarregando');
+            Object.assign(dados, data?.dados ?? []);
+            recarregaCss(data?.dados ?? []);   
+            delete data.dados;         
         } catch (error:any) {
             carregando.value = false;
             modalFechar('setoresCarregando');
@@ -150,6 +152,7 @@
         .catch(error =>{
             carregando.value = false
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+            modalFechar('setoresHabilitaDesabilita')
             modalAbrir('setoresMsgErro')
         })   
     }
@@ -157,17 +160,17 @@
     async function editar(){
         try{ 
             modalAbrir('setoresCarregando') 
-            const { data } = await axiosPlugin.get(`empresa-edit/${linhaSelecionada.id}`, token);
+            const { data } = await axiosPlugin.get(`setor-edit/${linhaSelecionada.id}`, token);
                 modalFechar('setoresCarregando')
-                carregaUpdate.value.setaDadosParaUpdate(data.empresa)    
-                modalAbrir('empresaEditar')       
+                carregaUpdate.value.setaDadosParaUpdate(data.setores)    
+                modalAbrir('setorEditar')       
         }catch(error:any){
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('setoresMsgErro')
         } 
     }
 
-    function EmpresaAtualizada($event: tsCampos){
+    function UpdateRealizado($event: tsCampos){
         const item = dadosPesquisados.find(i => i.id === $event.id)    //find(...) percorre o array procurando um item que tenha o mesmo id do $event.id.
         Object.assign(item, $event)                         //Atualiza o item encontrado, Mas de forma genérica e dinâmica — qualquer campo existente em $event substitui o valor em item.
     }
@@ -259,7 +262,11 @@
         <div class="col-md-12 div_centro"><div class="carregando"></div></div>
         <div class="col-md-12 div_centro">Aguarde</div>
     </ModalApp>
-    
+    <!-- MODAL EDITAR SETOR ============================================================================================== -->
+    <ModalApp   :isOpen="modal.setorEditar" @close="modalFechar('setorEditar')"  
+                :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
+        <SetorUpdate ref="carregaUpdate" @setorEditado="(UpdateRealizado($event))"/>
+    </ModalApp>    
     <!-- MODAL HABILITA DESABILITA USER ===================================================================================== -->
     <ModalApp   :isOpen="modal.setoresHabilitaDesabilita" @close="modalFechar('setoresHabilitaDesabilita')"  
                 :largura="'80%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" :title="linhaSelecionada.setor ?? ''" :mensagens="mensagensModal" >    
