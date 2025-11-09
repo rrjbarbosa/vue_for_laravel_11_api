@@ -153,8 +153,30 @@
             carregando.value = false
             Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalFechar('setoresHabilitaDesabilita')
-            modalAbrir('setoresMsgErro')
+            if(error.response.data.errors.msgsAuthorize.includes('*** USUÁRIOS VINCULADOS A ESSE SETOR ***')){
+                modalFechar('setoresHabilitaDesabilita')
+                modalAbrir('setorDesabilitarRemoverVinculoComTodosUsuarios')
+            }            
         })   
+    }
+
+    async function desabilitarRemoverVinculoComTodosUsuarios(){
+        carregando.value = true
+        await axiosPlugin.patch(`setor-desabilita-remover-vinculo-usuarios/${linhaSelecionada.id}`, token)
+        .then(() =>{
+            carregando.value = false
+            dados[linhaSelecionada.index].ativo = 0;                                      //-Atualiza array de objeto dados da grid
+            recarregaCss(dados)                                                             //-Recarrega a exibição da grid
+            modalFechar('setorDesabilitarRemoverVinculoComTodosUsuarios')
+            Object.assign(mensagensModal, ['Salvo com Sucesso']);
+            modalAbrir('setoresMsgOk')
+        })
+        .catch(error =>{
+            carregando.value = false
+            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+            modalFechar('setorDesabilitarRemoverVinculoComTodosUsuarios')
+            modalAbrir('setoresMsgErro')
+        })
     }
 
     async function editar(){
@@ -288,9 +310,36 @@
                 </div>
             </div>      
         </div>
+    </ModalApp>
+    <!-- MODAL DESABILITA E RETIRA O SETOR VINCULADO A TODOS USUÁRIOS======================================================== -->
+    <ModalApp   :isOpen="modal.setorDesabilitarRemoverVinculoComTodosUsuarios" @close="modalFechar('setorDesabilitarRemoverVinculoComTodosUsuarios')"  
+                :largura="'80%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" :title="linhaSelecionada.setor ?? ''" :mensagens="mensagensModal" >    
+        
+        <div class="row " style="padding-bottom: 50px;">
+            <div v-if="carregando">
+                <div class="col-md-12 div_centro"><div class="carregando"></div></div>
+                <div class="col-md-12 div_centro">Aguarde</div>
+            </div>
+            <div v-else>
+                <div class="col-md-12 div_centro msgErro"> 
+                    <div>O setor será removido de todos usuários... Desabilitar Confirma?</div>
+                </div>
+                <div class="col-md-12 div_centro" style="padding-top: 10px;">
+                    <button class="btnVerde" @click="desabilitarRemoverVinculoComTodosUsuarios()" :disabled="!administrador">
+                        Salvar 
+                    </button>
+                </div>
+                <div class="msgTopBotton">                           
+                    <div v-for="(msg, index) in mensagensModal.filter(Boolean)" :key="index" >   <!-- filter(Boolean) Remove null, undefined, "", 0, false e NaN (todos valores falsy): -->
+                        <div class="msgErro">
+                            <span style="color: brown; font-size: 20px;">&#8277;</span>{{'  ' + msg}}
+                        </div>    
+                    </div>
+                </div>
+            </div>      
+        </div>
         
     </ModalApp>
-
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
     <ModalApp   :isOpen="modal.setoresMsgErro" @close="modalFechar('setoresMsgErro')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'obs'" title="" :mensagens="mensagensModal"/>
@@ -368,5 +417,10 @@
         color: #087c42;
         font-weight: bold;
         font-size: 23px;
+    }
+    .msgErro{ng-bottom: 5px;
+        font-weight: bold;
+        color: brown;
+        padding-left: 10PX;
     }
 </style>
