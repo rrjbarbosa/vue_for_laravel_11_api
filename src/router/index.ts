@@ -3,6 +3,7 @@ import LoginApp from '@/components/login/LoginApp.vue'
 import MenuApp from '@/components/login/MenuApp.vue'
 import user from '@/router/user.ts'
 import empresas from '@/router/empresas.ts'
+import setores from './setores'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,7 @@ const router = createRouter({
     },
     ...user,                                                                            //-Seta rotas de User
     ...empresas,                                                                        //-Seta rotas de Empresas
+    ...setores,                                                                        //-Seta rotas de Empresas
   ],
 })
 
