@@ -2,7 +2,7 @@
     import { axiosPlugin } from '@/plugins/axios';
     import ModalApp from '@/components/diversos/modal/ModalApp.vue';
     import { modalAppCod } from '@/components/diversos/modal/modalAppCod';
-    import { computed, ref } from 'vue';
+    import { ref } from 'vue';
     import { reactive } from 'vue';
     import { codMsgInputsErros, codDataHora, codHeaderToken } from '@/codigos'
     import type {tsCamposEdicao} from './tsTipagem.types.ts'
@@ -18,6 +18,8 @@
     });
 
     const historicoArray = ref<Array<any>>([]);
+
+    const carregando = ref(false)    
     
     
     const campos  = reactive<tsCamposEdicao>({
@@ -47,21 +49,21 @@
     }    
         
     async function salvar(){
-        let erros = validarCampos()
-        if(erros>0){
-            return
-        }
-
+        let erros = validarCampos()                                             //-Valida os campos obrigatórios no front-end
+        if(erros>0) return                                                      //- Para se houver erros nos campos obrigatórios
+        carregando.value = true
+        modalAbrir('setoresCarregando');
         try{ 
-            let dados = campos 
-            const { data } = await axiosPlugin.post(`setor-update`, dados, token);
+            const { data } = await axiosPlugin.post(`setor-update`, campos, token);
             Object.assign(mensagensModal, ['Salvo com Sucesso']);            
-            console.log(data.historico_edicao)
-            historicoArray.value = data.historico_edicao ;
-            emit('setorEditado',dados)                //-Atualiza Pai SetoresApp.vue 
+            historicoArray.value = data.historico_edicao ;                      //-Atualiza o histórico de edição após salvar
+            emit('setorEditado',campos)                                         //-Atualiza SetoresApp.vue 
+            modalFechar('setoresCarregando');
             modalAbrir('setorUpdateMsgOk')
         }catch(error:any){
-           Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
+            carregando.value = true
+            modalFechar('setoresCarregando');
+            Object.assign(mensagensModal, modalMsgErro(error.response.data.errors));
             modalAbrir('setorUpdateMsgErro')
             camposComErro.value =  []
             camposComErro.value = codMsgInputsErros(error.response.data.errors)
@@ -92,7 +94,7 @@
     <div class="paddingDez">   
         <div class="paddingZero div_centro">
             <button @click="salvar()"   class="btn btn-sm btn-success botao" title="Salvar" >Salvar</button>
-        </div>{{ campos.historico_edicao }}
+        </div>
         <div class="row paddingZero">
             <div class="col-md-12">
                         <div class="label">Setor</div>                                    
@@ -131,7 +133,12 @@
             </div>
          </div>   
     </div>
-
+    <!-- MODAL AGUARDE ===================================================================================================== -->
+    <ModalApp   :isOpen="modal.setoresCarregando" @close="modalFechar('setoresCarregando')"  
+                :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'padrao'" title="..." :mensagens="mensagensModal" >    
+        <div class="col-md-12 div_centro"><div class="carregando"></div></div>
+        <div class="col-md-12 div_centro">Aguarde</div>
+    </ModalApp>
     <!-- MODAIS MSG ERRO / SUCESSO=========================================================================================== -->
     <ModalApp   :isOpen="modal.setorUpdateMsgErro" @close="modalFechar('setorUpdateMsgErro')" 
                 :largura="'95%'" :alturaMax="'50%'" :padraoObsOk="'obs'" title="" :mensagens="mensagensModal"/>
