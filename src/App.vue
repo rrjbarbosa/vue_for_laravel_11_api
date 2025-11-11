@@ -48,6 +48,7 @@ function rota(nome: string){
           </a>
         </div>
         <div>
+          <span style="margin-right: 10px; font-weight: bold;">{{ codUserLogado().name }}</span>
           <button v-if="usuarioLogado" @click="abrirModalMenu()" type="button" class="btn btn-outline-success btn-sm">Menu</button>
           <button v-if="usuarioLogado" @click="fazerLogout" type="button" class="btn btn-outline-dark btn-sm" style="margin-left: 10px; margin-right: 5px;">Sair</button>
         </div>

@@ -49,7 +49,7 @@
     const paginacao =  reactive<tsPaginarApp>({
         page:1, 
         ultima:0,
-        qtdPorPagina:10 , 
+        qtdPorPagina:20 , 
         qtdTotal:0, 
         paginacaoPaginas:[],
         acao:'GRID'
